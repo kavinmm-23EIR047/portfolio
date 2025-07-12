@@ -115,7 +115,7 @@ const Hero = () => {
         {/* Social Icons */}
         <div className="mt-6 flex gap-6 justify-center text-2xl text-blue-400">
           <a
-            href="https://linkedin.com/in/kavinmm200"
+            href="https://www.linkedin.com/in/kavin-m-m-710520272/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-blue-500 transition"
@@ -123,7 +123,7 @@ const Hero = () => {
             <FaLinkedin />
           </a>
           <a
-            href="https://instagram.com/YOUR_INSTAGRAM"
+            href="https://www.instagram.com/ak_webflair_technologies/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-pink-500 transition"
@@ -131,7 +131,7 @@ const Hero = () => {
             <FaInstagram />
           </a>
           <a
-            href="https://github.com/kavinmm200"
+            href="https://github.com/kavinmm-23EIR047/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-gray-300 transition"

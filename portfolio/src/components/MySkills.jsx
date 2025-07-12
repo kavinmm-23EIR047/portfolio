@@ -82,7 +82,9 @@ const skills = [
 
 const MySkills = () => {
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-gray-950 to-gray-900 text-white">
+    <section 
+     id="myskills"
+    className="py-20 px-4 bg-gradient-to-b from-gray-950 to-gray-900 text-white">
       <motion.h2
         className="text-center text-3xl md:text-5xl font-extrabold mb-10"
         initial={{ opacity: 0, y: -50 }}

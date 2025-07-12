@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
 
+// ✅ Updated nav structure for company website
 const navLinks = [
   { id: "hero", label: "Home" },
-  { id: "services", label: "About" },
-  { id: "about", label: "Services" },
+  { id: "about", label: "About Us" },
+  { id: "services", label: "Services" },
   { id: "myskills", label: "Skills" },
   { id: "portfolio", label: "Portfolio" },
+  { id: "reviews", label: "Reviews" },
   { id: "contact", label: "Contact" },
 ];
 
@@ -21,7 +23,6 @@ const Header = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -56,7 +57,9 @@ const Header = () => {
       }`}
     >
       <div className="flex justify-between items-center px-5 py-4 max-w-6xl mx-auto text-white">
-        <h1 className="text-xl md:text-2xl font-bold text-blue-200">Kavin's Portfolio</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-blue-200">
+          AK Web Flair Technologies
+        </h1>
 
         <ul className="hidden md:flex gap-6">
           {navLinks.map((link) => (
@@ -64,7 +67,9 @@ const Header = () => {
               <a
                 href={`#${link.id}`}
                 className={`transition-colors duration-200 ${
-                  activeLink === link.id ? "text-yellow-300" : "hover:text-blue-300"
+                  activeLink === link.id
+                    ? "text-yellow-300"
+                    : "hover:text-blue-300"
                 }`}
               >
                 {link.label}
@@ -92,7 +97,9 @@ const Header = () => {
               href={`#${link.id}`}
               onClick={() => setIsOpen(false)}
               className={`py-2 text-center border-b border-gray-700 ${
-                activeLink === link.id ? "text-yellow-300" : "hover:text-blue-300"
+                activeLink === link.id
+                  ? "text-yellow-300"
+                  : "hover:text-blue-300"
               }`}
             >
               {link.label}
