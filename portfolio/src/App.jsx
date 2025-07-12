@@ -6,7 +6,7 @@ import About from "./components/About";
 import Services from "./components/Services";
 import MySkills from "./components/MySkills";
 import Portfolio from "./components/Portfolio";
-import Reviews from "./components/Reviews"; // ✅ Un-commented
+import Reviews from "./components/Reviews";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import { motion } from "framer-motion";
@@ -47,12 +47,8 @@ const App = () => {
       >
         <Services />
       </motion.section>
-<<<<<<< HEAD
 
       {/* My Skills Section */}
-=======
-   {/* My Skills Section */}
->>>>>>> e0321b1a1445198c1bd3c8519232507ee4cf8403
       <motion.section
         id="skills"
         initial={{ opacity: 0, y: 50 }}
@@ -62,10 +58,7 @@ const App = () => {
       >
         <MySkills />
       </motion.section>
-<<<<<<< HEAD
 
-=======
->>>>>>> e0321b1a1445198c1bd3c8519232507ee4cf8403
       {/* Portfolio Section */}
       <motion.section
         id="portfolio"
@@ -77,7 +70,7 @@ const App = () => {
         <Portfolio />
       </motion.section>
 
-      {/* ✅ Reviews Section */}
+      {/* Reviews Section */}
       <motion.section
         id="reviews"
         initial={{ opacity: 0, scale: 0.9 }}

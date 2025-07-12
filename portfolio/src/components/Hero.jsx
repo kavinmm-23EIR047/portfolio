@@ -24,7 +24,7 @@ const Hero = () => {
     const drops = Array.from({ length: columns }).fill(1);
 
     function draw() {
-      ctx.fillStyle = "rgba(10, 25, 47, 0.15)"; // Dark blue transparent
+      ctx.fillStyle = "rgba(10, 25, 47, 0.15)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.fillStyle = "#3b82f6"; // Tailwind blue-500
@@ -48,42 +48,16 @@ const Hero = () => {
 
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen bg-[#0a192f] text-white text-center px-4 overflow-hidden">
-      {/* Canvas Code Background */}
+      {/* Canvas Background */}
       <canvas id="code-bg" className="absolute top-0 left-0 w-full h-full z-0" />
-
-      {/* Dark Blue Gradient Overlay */}
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#0a192f]/90 via-[#0a192f]/70 to-[#0a192f] z-10" />
 
-<<<<<<< HEAD
       <div className="relative z-20 flex flex-col items-center justify-center">
         <motion.h2
           className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-wide"
           initial={{ opacity: 0, y: -40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-=======
-      {/* CTA Buttons */}
-      <div className="mt-6 flex gap-4">
-        <a
-          href="/kavinresumeintern.pdf"
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <motion.button
-            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded text-lg font-semibold transition-transform"
-            whileHover={{ scale: 1.1 }}
-          >
-            Resume
-          </motion.button>
-        </a>
-
-        {/* Contact Us Button with Scroll */}
-        <motion.button
-          className="px-6 py-2 bg-gray-500 hover:bg-green-600 rounded text-lg font-semibold transition-transform"
-          whileHover={{ scale: 1.1 }}
-          onClick={scrollToContact}
->>>>>>> e0321b1a1445198c1bd3c8519232507ee4cf8403
         >
           I'm a{" "}
           <span className="text-blue-400 drop-shadow-lg">
@@ -113,6 +87,7 @@ const Hero = () => {
           I build beautiful, responsive, and scalable applications with cutting-edge technologies.
         </motion.p>
 
+        {/* CTA Buttons */}
         <div className="mt-8 flex gap-4 flex-wrap justify-center">
           <a
             href="/kavinresumeintern.pdf"
@@ -140,7 +115,7 @@ const Hero = () => {
         {/* Social Icons */}
         <div className="mt-6 flex gap-6 justify-center text-2xl text-blue-400">
           <a
-            href="https://linkedin.com/in/YOUR_LINKEDIN"
+            href="https://linkedin.com/in/kavinmm200"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-blue-500 transition"
@@ -156,7 +131,7 @@ const Hero = () => {
             <FaInstagram />
           </a>
           <a
-            href="https://github.com/YOUR_GITHUB"
+            href="https://github.com/kavinmm200"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-gray-300 transition"
