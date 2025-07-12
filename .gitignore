@@ -1,0 +1,29 @@
+# === Node Modules ===
+node_modules/
+
+# === Builds ===
+dist/
+build/
+
+# === Environment Files (Frontend + Backend) ===
+.env
+portfolio/.env
+backend/.env
+
+# === Secret/Service Files ===
+credentials.json
+backend/credentials.json
+backend/service-account.json
+
+# === Logs ===
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === System Files ===
+.DS_Store
+Thumbs.db
+
+# === Editor Configs ===
+.vscode/
+.idea/

@@ -1,0 +1,18 @@
+{
+  "name": "contact-form-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --openssl-legacy-provider server.js"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "googleapis": "^152.0.0",
+    "nodemailer": "^6.10.0",
+    "open": "^10.1.2"
+  }
+}
