@@ -68,7 +68,7 @@ app.post('/api/contact', async (req, res) => {
   // Send Admin Email
   try {
     await transporter.sendMail({
-      from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
+      from: `"Project Contact" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       subject: `📬 New Contact Message from ${name}`,
       html: `
