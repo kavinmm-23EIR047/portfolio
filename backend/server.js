@@ -88,14 +88,14 @@ app.post('/api/contact', async (req, res) => {
   // Send Auto-reply
   try {
     await transporter.sendMail({
-      from: `"Portfolio Team" <${process.env.EMAIL_USER}>`,
+      from: `"Development Team" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '✅ Thanks for contacting us!',
       html: `
         <p>Hi <strong>${name}</strong>,</p>
         <p>Thank you for contacting us! We’ve received your message and will get back to you soon.</p>
         <br />
-        <p>Regards,<br/>Portfolio Team</p>
+        <p>Regards,<br/>Development Team</p>
       `,
     });
     console.log('📨 Auto-reply email sent');
