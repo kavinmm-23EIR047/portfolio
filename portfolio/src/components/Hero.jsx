@@ -1,9 +1,11 @@
 import { Typewriter } from "react-simple-typewriter";
 import { motion } from "framer-motion";
 import { FaLinkedin, FaInstagram, FaGithub } from "react-icons/fa";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 const Hero = () => {
+  const canvasRef = useRef();
+
   const scrollToContact = () => {
     const contactSection = document.getElementById("contact");
     if (contactSection) {
@@ -12,22 +14,27 @@ const Hero = () => {
   };
 
   useEffect(() => {
-    const canvas = document.getElementById("code-bg");
+    const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
 
     const letters = "01<>/[]{}constletfunctionreturn";
     const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = Array.from({ length: columns }).fill(1);
+    let columns, drops;
 
-    function draw() {
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      columns = Math.floor(canvas.width / fontSize);
+      drops = Array(columns).fill(1);
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    const draw = () => {
       ctx.fillStyle = "rgba(10, 25, 47, 0.15)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#3b82f6"; // Tailwind blue-500
+      ctx.fillStyle = "#3b82f6";
       ctx.font = `${fontSize}px monospace`;
 
       drops.forEach((y, i) => {
@@ -40,19 +47,26 @@ const Hero = () => {
 
         drops[i]++;
       });
-    }
+    };
 
     const interval = setInterval(draw, 50);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("resize", resizeCanvas);
+    };
   }, []);
 
   return (
-    <section className="relative flex flex-col items-center justify-center min-h-screen bg-[#0a192f] text-white text-center px-4 overflow-hidden">
-      {/* Canvas Background */}
-      <canvas id="code-bg" className="absolute top-0 left-0 w-full h-full z-0" />
+    <section className="relative min-h-screen bg-[#0a192f] text-white px-4 overflow-hidden flex items-center justify-center">
+      {/* Fullscreen background canvas */}
+      <canvas
+        ref={canvasRef}
+        className="absolute top-0 left-0 w-full h-full z-0"
+      />
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#0a192f]/90 via-[#0a192f]/70 to-[#0a192f] z-10" />
 
-      <div className="relative z-20 flex flex-col items-center justify-center">
+      {/* Centered content */}
+      <div className="relative z-20 max-w-6xl w-full mx-auto text-center flex flex-col items-center justify-center">
         <motion.h2
           className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-wide"
           initial={{ opacity: 0, y: -40 }}

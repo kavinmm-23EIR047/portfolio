@@ -5,16 +5,27 @@
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden; /* 🔧 Prevent horizontal scroll */
 }
 
-/* Gradient Background */
+/* Global body styles */
 body {
   background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #000);
   background-size: 400% 400%;
   min-height: 100vh;
   color: white;
   font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
+  overflow-x: hidden; /* ✅ Ensures no side-scroll */
+  width: 100vw;        /* ✅ Prevents overflow from fixed/abs children */
+  max-width: 100vw;    /* ✅ Fix for canvas & fixed nav overflow */
+}
+
+/* Optional: Prevent any scroll bleed on body/sections */
+section,
+main,
+div {
+  max-width: 100vw;
+  box-sizing: border-box;
 }
 
 /* Swiper Pagination Positioned Outside the Card */
@@ -35,7 +46,7 @@ body {
 }
 
 .swiper-pagination-bullet {
-  width: 16px !important;      /* reduced from 28px */
+  width: 16px !important;
   height: 16px !important;
   background: #1e3a8a !important;
   opacity: 0.9 !important;
@@ -49,11 +60,11 @@ body {
 .swiper-pagination-bullet-active {
   background: #06b6d4 !important;
   border-color: #1e3a8a !important;
-  transform: scale(1.2) !important;  /* slightly smaller scale */
+  transform: scale(1.2) !important;
   opacity: 1 !important;
 }
 
-/* Default (Desktop) - Swiper Navigation Arrows */
+/* Swiper Navigation Arrows */
 .swiper-button-next,
 .swiper-button-prev {
   width: 32px !important;
@@ -89,7 +100,6 @@ body {
   color: #06b6d4 !important;
 }
 
-/* Hover Effect */
 .swiper-button-next:hover,
 .swiper-button-prev:hover {
   background-color: #1e40af !important;
