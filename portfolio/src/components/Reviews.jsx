@@ -108,7 +108,7 @@ const Reviews = () => {
 
       <div className="text-center mt-6">
         <a
-          href="https://www.google.com/search?q=memories+platform+tiruppur&hl=en#lrd=0x3ba90f4c145601e7:0x96e8b5c54ab3379,1,,,"
+          href="https://g.co/kgs/d1NUPo4"
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-400 hover:underline"
