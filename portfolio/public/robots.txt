@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://akwebflairtechnologies.vercel.app/sitemap.xml
+Sitemap: https://akwebflairtechnologies.vercel.app/sitemap_index.xml
