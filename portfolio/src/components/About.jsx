@@ -42,11 +42,11 @@ const trustedCompanies = [
     logo: "https://memories-platform-holidays.vercel.app/logo.jpg",
     url: "https://memories-platform-holidays.vercel.app/",
   },
-  // {
-  //   name: "Client B",
-  //   logo: "/images/companies/client2.png",
-  //   url: "https://clientB.in",
-  // },
+  {
+    name: "Crazy Capture Studio",
+    logo: "https://res.cloudinary.com/dxm3glvjq/image/upload/v1755920494/favicon_1_qn39dz.ico",
+    url: "https://crazy-capture-studio.vercel.app/",
+  },
   // {
   //   name: "Client C",
   //   logo: "/images/companies/client3.png",
