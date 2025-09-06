@@ -44,7 +44,7 @@ const trustedCompanies = [
   },
   {
     name: "Crazy Capture Studio",
-    logo: "https://res.cloudinary.com/dxm3glvjq/image/upload/v1755920494/favicon_1_qn39dz.ico",
+    logo: "https://crazy-capture-studio.vercel.app/Crazylogo.jpg",
     url: "https://crazy-capture-studio.vercel.app/",
   },
   // {
