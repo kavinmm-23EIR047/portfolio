@@ -57,7 +57,7 @@ app.post('/api/contact', (req, res) => {
     message: '✅ Message received successfully',
   });
 
-  // Background processing
+  // Background processing (non-blocking)
   processContactInBackground({ name, email, phone, comment });
 });
 
@@ -71,7 +71,7 @@ function sleep(ms) {
 /* ================================
    HELPER: sendMailWithRetry
 ================================ */
-async function sendMailWithRetry(transporter, mailOptions, retries = 3, delayMs = 3000) {
+async function sendMailWithRetry(transporter, mailOptions, retries = 2, delayMs = 1000) {
   for (let i = 0; i < retries; i++) {
     try {
       await transporter.sendMail(mailOptions);
@@ -87,6 +87,7 @@ async function sendMailWithRetry(transporter, mailOptions, retries = 3, delayMs 
       }
     }
   }
+  return false;
 }
 
 /* ================================
@@ -109,12 +110,7 @@ async function processContactInBackground({ name, email, phone, comment }) {
       console.log('✅ Data saved to Google Sheets');
     }
 
-    // ---------- Delay before sending emails ----------
-    const delayMs = 7000; // 7 seconds delay
-    console.log(`⏳ Waiting ${delayMs / 1000}s before sending emails...`);
-    await sleep(delayMs);
-
-    // ---------- EMAIL SETUP (GMAIL) ----------
+    /* ---------- EMAIL SETUP (GMAIL) ---------- */
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
@@ -123,6 +119,9 @@ async function processContactInBackground({ name, email, phone, comment }) {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS, // Gmail App Password
       },
+      pool: true, // Use connection pooling
+      maxConnections: 1,
+      maxMessages: 3,
     });
 
     // Admin email
@@ -153,13 +152,31 @@ async function processContactInBackground({ name, email, phone, comment }) {
       `,
     };
 
-    // Send emails with retry and small delay
-    await sendMailWithRetry(transporter, adminMail);
-    await sleep(1000);
-    await sendMailWithRetry(transporter, autoReplyMail);
+    // Send both emails in parallel (faster!)
+    const [adminResult, autoReplyResult] = await Promise.allSettled([
+      sendMailWithRetry(transporter, adminMail, 2, 1000),
+      sendMailWithRetry(transporter, autoReplyMail, 2, 1000),
+    ]);
+
+    // Log results
+    if (adminResult.status === 'fulfilled' && adminResult.value) {
+      console.log('✅ Admin email sent successfully');
+    } else {
+      console.error('❌ Admin email failed');
+    }
+
+    if (autoReplyResult.status === 'fulfilled' && autoReplyResult.value) {
+      console.log('✅ Auto-reply email sent successfully');
+    } else {
+      console.error('❌ Auto-reply email failed');
+    }
+
+    // Close transporter
+    transporter.close();
 
   } catch (err) {
     console.error('❌ Background processing failed:', err.message);
+    console.error('Stack trace:', err.stack);
   }
 }
 
@@ -195,6 +212,7 @@ process.on('uncaughtException', (err) => {
 
 console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
 console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
+console.log('GOOGLE_SHEET_ID exists:', !!process.env.GOOGLE_SHEET_ID);
 
 /* ================================
    SERVER START
