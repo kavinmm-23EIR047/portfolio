@@ -51,13 +51,13 @@ app.post('/api/contact', (req, res) => {
     });
   }
 
-  // 🚀 INSTANT RESPONSE (Frontend speed)
+  // 🚀 INSTANT RESPONSE
   res.status(200).json({
     success: true,
     message: '✅ Message received successfully',
   });
 
-  // 🔥 BACKGROUND PROCESS (Non-blocking)
+  // 🔥 BACKGROUND PROCESS
   processContactInBackground({ name, email, phone, comment });
 });
 
@@ -87,42 +87,53 @@ async function processContactInBackground({ name, email, phone, comment }) {
 
     /* ---------- EMAIL SETUP ---------- */
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // SSL
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS, // App Password from Gmail
       },
     });
 
-    /* ---------- ADMIN EMAIL ---------- */
-    await transporter.sendMail({
-      from: `"Project Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
-      subject: `📬 New Contact Message from ${name}`,
-      html: `
-        <h3>New Contact Submission</h3>
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Phone:</b> ${phone}</p>
-        <p><b>Comment:</b> ${comment}</p>
-        <p><i>${new Date().toLocaleString()}</i></p>
-      `,
-    });
+    // ---------- ADMIN EMAIL ----------
+    try {
+      await transporter.sendMail({
+        from: `"Project Contact" <${process.env.EMAIL_USER}>`,
+        to: process.env.EMAIL_USER,
+        subject: `📬 New Contact Message from ${name}`,
+        html: `
+          <h3>New Contact Submission</h3>
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Phone:</b> ${phone}</p>
+          <p><b>Comment:</b> ${comment}</p>
+          <p><i>${new Date().toLocaleString()}</i></p>
+        `,
+      });
+      console.log('📨 Admin email sent successfully');
+    } catch (err) {
+      console.error('❌ Failed to send admin email:', err.message);
+    }
 
-    /* ---------- AUTO REPLY ---------- */
-    await transporter.sendMail({
-      from: `"Development Team" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: '✅ Thanks for contacting us!',
-      html: `
-        <p>Hi <strong>${name}</strong>,</p>
-        <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
-        <br/>
-        <p>Regards,<br/>Development Team</p>
-      `,
-    });
+    // ---------- AUTO REPLY ----------
+    try {
+      await transporter.sendMail({
+        from: `"Development Team" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: '✅ Thanks for contacting us!',
+        html: `
+          <p>Hi <strong>${name}</strong>,</p>
+          <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
+          <br/>
+          <p>Regards,<br/>Development Team</p>
+        `,
+      });
+      console.log('📨 Auto-reply email sent successfully');
+    } catch (err) {
+      console.error('❌ Failed to send auto-reply email:', err.message);
+    }
 
-    console.log('📨 Emails sent successfully');
   } catch (err) {
     console.error('❌ Background processing failed:', err.message);
   }
@@ -161,6 +172,9 @@ process.on('unhandledRejection', (err) => {
 process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
 });
+
+console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
+console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
 
 /* ================================
    SERVER START
