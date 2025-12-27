@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 /* ================================
-   GOOGLE AUTH SETUP (SAFE)
+   GOOGLE AUTH SETUP
 ================================ */
 let auth = null;
 
@@ -39,7 +39,7 @@ app.get('/', (req, res) => {
 });
 
 /* ================================
-   CONTACT API (FAST RESPONSE)
+   CONTACT API
 ================================ */
 app.post('/api/contact', (req, res) => {
   const { name, email, phone, comment } = req.body;
@@ -51,60 +51,77 @@ app.post('/api/contact', (req, res) => {
     });
   }
 
-  // 🚀 INSTANT RESPONSE
+  // Instant frontend response
   res.status(200).json({
     success: true,
     message: '✅ Message received successfully',
   });
 
-  // 🔥 BACKGROUND PROCESS
+  // Background processing
   processContactInBackground({ name, email, phone, comment });
 });
 
 /* ================================
-   HELPER: DELAY FUNCTION
+   HELPER: sleep
 ================================ */
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /* ================================
-   HELPER: SEND EMAIL WITH RETRY
+   HELPER: sendMailWithRetry
+================================ */
+async function sendMailWithRetry(transporter, mailOptions, retries = 3, delayMs = 3000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`📨 Email sent to ${mailOptions.to}`);
+      return true;
+    } catch (err) {
+      console.warn(`⚠️ Email attempt ${i + 1} failed: ${err.message}`);
+      if (i < retries - 1) {
+        console.log(`⏳ Retrying in ${delayMs / 1000}s...`);
+        await sleep(delayMs);
+      } else {
+        console.error(`❌ All email attempts failed for ${mailOptions.to}`);
+      }
+    }
+  }
+}
+
+/* ================================
+   BACKGROUND WORKER
 ================================ */
 async function processContactInBackground({ name, email, phone, comment }) {
   try {
     const timestamp = new Date().toISOString();
 
-    // Save to Google Sheets immediately
+    /* ---------- GOOGLE SHEETS ---------- */
     if (auth) {
       const sheets = google.sheets({ version: 'v4', auth });
-
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
         range: 'Contact!A1:E1',
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
-        requestBody: {
-          values: [[name, email, phone, comment, timestamp]],
-        },
+        requestBody: { values: [[name, email, phone, comment, timestamp]] },
       });
-
       console.log('✅ Data saved to Google Sheets');
     }
 
-    // Delay email sending 5–10 seconds
-    const delayMs = 7000; // 7 seconds (you can change to 5000 or 10000)
+    // ---------- Delay before sending emails ----------
+    const delayMs = 7000; // 7 seconds delay
     console.log(`⏳ Waiting ${delayMs / 1000}s before sending emails...`);
-    await new Promise(resolve => setTimeout(resolve, delayMs));
+    await sleep(delayMs);
 
-    // Email setup
+    // ---------- EMAIL SETUP (GMAIL) ----------
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
-      secure: true, // SSL
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS, // Gmail App Password
       },
     });
 
@@ -113,12 +130,14 @@ async function processContactInBackground({ name, email, phone, comment }) {
       from: `"Project Contact" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       subject: `📬 New Contact Message from ${name}`,
-      html: `<h3>New Contact Submission</h3>
-             <p><b>Name:</b> ${name}</p>
-             <p><b>Email:</b> ${email}</p>
-             <p><b>Phone:</b> ${phone}</p>
-             <p><b>Comment:</b> ${comment}</p>
-             <p><i>${new Date().toLocaleString()}</i></p>`
+      html: `
+        <h3>New Contact Submission</h3>
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Phone:</b> ${phone}</p>
+        <p><b>Comment:</b> ${comment}</p>
+        <p><i>${timestamp}</i></p>
+      `,
     };
 
     // Auto-reply email
@@ -126,24 +145,23 @@ async function processContactInBackground({ name, email, phone, comment }) {
       from: `"Development Team" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '✅ Thanks for contacting us!',
-      html: `<p>Hi <strong>${name}</strong>,</p>
-             <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
-             <br/>
-             <p>Regards,<br/>Development Team</p>`
+      html: `
+        <p>Hi <strong>${name}</strong>,</p>
+        <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
+        <br/>
+        <p>Regards,<br/>Development Team</p>
+      `,
     };
 
-    // Send emails
-    await transporter.sendMail(adminMail);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // small delay between emails
-    await transporter.sendMail(autoReplyMail);
-
-    console.log('📨 Emails sent successfully after delay');
+    // Send emails with retry and small delay
+    await sendMailWithRetry(transporter, adminMail);
+    await sleep(1000);
+    await sendMailWithRetry(transporter, autoReplyMail);
 
   } catch (err) {
     console.error('❌ Background processing failed:', err.message);
   }
 }
-
 
 /* ================================
    FEEDBACK ROUTE
@@ -151,7 +169,7 @@ async function processContactInBackground({ name, email, phone, comment }) {
 app.use('/api/feedback', feedbackRoutes);
 
 /* ================================
-   TIMEOUT MIDDLEWARE
+   TIMEOUT & 404
 ================================ */
 app.use((req, res, next) => {
   res.setTimeout(15000, () => {
@@ -161,9 +179,6 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ================================
-   404 HANDLER
-================================ */
 app.use((req, res) => {
   res.status(404).json({ message: '❌ Route not found' });
 });
@@ -174,7 +189,6 @@ app.use((req, res) => {
 process.on('unhandledRejection', (err) => {
   console.error('❌ Unhandled Rejection:', err);
 });
-
 process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
 });
@@ -186,7 +200,6 @@ console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
    SERVER START
 ================================ */
 const PORT = process.env.PORT || 5001;
-
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
