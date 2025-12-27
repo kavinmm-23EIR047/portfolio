@@ -62,6 +62,34 @@ app.post('/api/contact', (req, res) => {
 });
 
 /* ================================
+   HELPER: DELAY FUNCTION
+================================ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/* ================================
+   HELPER: SEND EMAIL WITH RETRY
+================================ */
+async function sendEmailWithRetry(transporter, mailOptions, retries = 3, delayMs = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`📨 Email sent to ${mailOptions.to}`);
+      return true;
+    } catch (err) {
+      console.warn(`⚠️ Email attempt ${i + 1} failed: ${err.message}`);
+      if (i < retries - 1) {
+        console.log(`⏳ Retrying in ${delayMs / 1000}s...`);
+        await sleep(delayMs);
+      } else {
+        console.error('❌ All email attempts failed for:', mailOptions.to);
+      }
+    }
+  }
+}
+
+/* ================================
    BACKGROUND WORKER
 ================================ */
 async function processContactInBackground({ name, email, phone, comment }) {
@@ -92,47 +120,42 @@ async function processContactInBackground({ name, email, phone, comment }) {
       secure: true, // SSL
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // App Password from Gmail
+        pass: process.env.EMAIL_PASS, // Gmail App Password
       },
     });
 
-    // ---------- ADMIN EMAIL ----------
-    try {
-      await transporter.sendMail({
-        from: `"Project Contact" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER,
-        subject: `📬 New Contact Message from ${name}`,
-        html: `
-          <h3>New Contact Submission</h3>
-          <p><b>Name:</b> ${name}</p>
-          <p><b>Email:</b> ${email}</p>
-          <p><b>Phone:</b> ${phone}</p>
-          <p><b>Comment:</b> ${comment}</p>
-          <p><i>${new Date().toLocaleString()}</i></p>
-        `,
-      });
-      console.log('📨 Admin email sent successfully');
-    } catch (err) {
-      console.error('❌ Failed to send admin email:', err.message);
-    }
+    // Admin email
+    const adminMail = {
+      from: `"Project Contact" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER,
+      subject: `📬 New Contact Message from ${name}`,
+      html: `
+        <h3>New Contact Submission</h3>
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Phone:</b> ${phone}</p>
+        <p><b>Comment:</b> ${comment}</p>
+        <p><i>${new Date().toLocaleString()}</i></p>
+      `,
+    };
 
-    // ---------- AUTO REPLY ----------
-    try {
-      await transporter.sendMail({
-        from: `"Development Team" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: '✅ Thanks for contacting us!',
-        html: `
-          <p>Hi <strong>${name}</strong>,</p>
-          <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
-          <br/>
-          <p>Regards,<br/>Development Team</p>
-        `,
-      });
-      console.log('📨 Auto-reply email sent successfully');
-    } catch (err) {
-      console.error('❌ Failed to send auto-reply email:', err.message);
-    }
+    // Auto-reply email
+    const autoReplyMail = {
+      from: `"Development Team" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: '✅ Thanks for contacting us!',
+      html: `
+        <p>Hi <strong>${name}</strong>,</p>
+        <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
+        <br/>
+        <p>Regards,<br/>Development Team</p>
+      `,
+    };
+
+    // Send emails asynchronously with retry and delay
+    sendEmailWithRetry(transporter, adminMail);
+    await sleep(1000); // small delay between emails
+    sendEmailWithRetry(transporter, autoReplyMail);
 
   } catch (err) {
     console.error('❌ Background processing failed:', err.message);
@@ -168,8 +191,6 @@ app.use((req, res) => {
 process.on('unhandledRejection', (err) => {
   console.error('❌ Unhandled Rejection:', err);
 });
-console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
-console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
 
 process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
