@@ -71,32 +71,11 @@ function sleep(ms) {
 /* ================================
    HELPER: SEND EMAIL WITH RETRY
 ================================ */
-async function sendEmailWithRetry(transporter, mailOptions, retries = 3, delayMs = 2000) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log(`📨 Email sent to ${mailOptions.to}`);
-      return true;
-    } catch (err) {
-      console.warn(`⚠️ Email attempt ${i + 1} failed: ${err.message}`);
-      if (i < retries - 1) {
-        console.log(`⏳ Retrying in ${delayMs / 1000}s...`);
-        await sleep(delayMs);
-      } else {
-        console.error('❌ All email attempts failed for:', mailOptions.to);
-      }
-    }
-  }
-}
-
-/* ================================
-   BACKGROUND WORKER
-================================ */
 async function processContactInBackground({ name, email, phone, comment }) {
   try {
     const timestamp = new Date().toISOString();
 
-    /* ---------- GOOGLE SHEETS ---------- */
+    // Save to Google Sheets immediately
     if (auth) {
       const sheets = google.sheets({ version: 'v4', auth });
 
@@ -113,14 +92,19 @@ async function processContactInBackground({ name, email, phone, comment }) {
       console.log('✅ Data saved to Google Sheets');
     }
 
-    /* ---------- EMAIL SETUP ---------- */
+    // Delay email sending 5–10 seconds
+    const delayMs = 7000; // 7 seconds (you can change to 5000 or 10000)
+    console.log(`⏳ Waiting ${delayMs / 1000}s before sending emails...`);
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+
+    // Email setup
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
       secure: true, // SSL
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // Gmail App Password
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -129,14 +113,12 @@ async function processContactInBackground({ name, email, phone, comment }) {
       from: `"Project Contact" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       subject: `📬 New Contact Message from ${name}`,
-      html: `
-        <h3>New Contact Submission</h3>
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Phone:</b> ${phone}</p>
-        <p><b>Comment:</b> ${comment}</p>
-        <p><i>${new Date().toLocaleString()}</i></p>
-      `,
+      html: `<h3>New Contact Submission</h3>
+             <p><b>Name:</b> ${name}</p>
+             <p><b>Email:</b> ${email}</p>
+             <p><b>Phone:</b> ${phone}</p>
+             <p><b>Comment:</b> ${comment}</p>
+             <p><i>${new Date().toLocaleString()}</i></p>`
     };
 
     // Auto-reply email
@@ -144,23 +126,24 @@ async function processContactInBackground({ name, email, phone, comment }) {
       from: `"Development Team" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '✅ Thanks for contacting us!',
-      html: `
-        <p>Hi <strong>${name}</strong>,</p>
-        <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
-        <br/>
-        <p>Regards,<br/>Development Team</p>
-      `,
+      html: `<p>Hi <strong>${name}</strong>,</p>
+             <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
+             <br/>
+             <p>Regards,<br/>Development Team</p>`
     };
 
-    // Send emails asynchronously with retry and delay
-    sendEmailWithRetry(transporter, adminMail);
-    await sleep(1000); // small delay between emails
-    sendEmailWithRetry(transporter, autoReplyMail);
+    // Send emails
+    await transporter.sendMail(adminMail);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // small delay between emails
+    await transporter.sendMail(autoReplyMail);
+
+    console.log('📨 Emails sent successfully after delay');
 
   } catch (err) {
     console.error('❌ Background processing failed:', err.message);
   }
 }
+
 
 /* ================================
    FEEDBACK ROUTE
