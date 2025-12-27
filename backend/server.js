@@ -168,6 +168,8 @@ app.use((req, res) => {
 process.on('unhandledRejection', (err) => {
   console.error('❌ Unhandled Rejection:', err);
 });
+console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
+console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
 
 process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
