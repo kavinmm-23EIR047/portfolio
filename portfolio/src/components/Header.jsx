@@ -1,145 +1,144 @@
-// Header.jsx
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
-  { id: "hero", label: "Home" },
-  { id: "about", label: "About Us" },
-  { id: "services", label: "Services" },
-  { id: "myskills", label: "Skills" },
-  { id: "portfolio", label: "Portfolio" },
-  { id: "reviews", label: "Reviews" },
-  { id: "contact", label: "Contact" },
+  { id: "hero",      label: "Home",      type: "scroll" },
+  { id: "about",     label: "About",     type: "scroll" },
+  { id: "services",  label: "Services",  type: "scroll" },
+  { id: "products",  label: "Products",  type: "coming" },
+  { id: "portfolio", label: "Portfolio", type: "scroll" },
+  { id: "reviews",   label: "Reviews",   type: "scroll" },
+  { id: "contact",   label: "Contact",   type: "scroll" },
 ];
 
 const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeLink, setActiveLink] = useState("hero");
-  const [scrolled, setScrolled] = useState(false);
+  const [isOpen, setIsOpen]           = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [scrolled, setScrolled]       = useState(false);
+  const [active, setActive]           = useState("hero");
+  const [darkMode, setDarkMode]       = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const saved = localStorage.getItem("theme");
+    if (saved) {
+      const isDark = saved === "dark";
+      document.documentElement.classList.toggle("dark", isDark);
+      setDarkMode(isDark);
+    } else {
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.classList.toggle("dark", systemDark);
+      setDarkMode(systemDark);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newDark = !darkMode;
+    document.documentElement.classList.toggle("dark", newDark);
+    localStorage.setItem("theme", newDark ? "dark" : "light");
+    setDarkMode(newDark);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+      const scrollPos = window.scrollY + 120;
+      navLinks.forEach((link) => {
+        const el = document.getElementById(link.id);
+        if (el && scrollPos >= el.offsetTop && scrollPos < el.offsetTop + el.offsetHeight) {
+          setActive(link.id);
+        }
+      });
+    };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) setActiveLink(entry.target.id);
-        });
-      },
-      { threshold: 0.6 }
-    );
-    navLinks.forEach((link) => {
-      const section = document.getElementById(link.id);
-      if (section) observer.observe(section);
-    });
-    return () => observer.disconnect();
-  }, []);
+  const handleNavClick = (link) => {
+    if (link.type === "coming") {
+      setShowComingSoon(true);
+      setTimeout(() => setShowComingSoon(false), 2000);
+      return;
+    }
+    document.getElementById(link.id)?.scrollIntoView({ behavior: "smooth" });
+    setIsOpen(false);
+  };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 w-full z-50 shadow-md transition-all duration-300 ${
+    <>
+      {/* ✅ z-50 so it's above Three.js canvas (z-0) and content (z-2) */}
+      <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900"
-          : "bg-gray-900"
-      }`}
-    >
-      <div className="flex justify-start items-center px-5 py-4 max-w-6xl mx-auto text-white relative">
-        {/* Hamburger menu (shown only when closed) */}
-        {!isOpen && (
-          <button
-            className="md:hidden text-white z-50 mr-4"
-            onClick={() => setIsOpen(true)}
-          >
-            <Menu size={28} />
-          </button>
-        )}
+          ? "bg-white/90 dark:bg-slate-950/95 backdrop-blur-xl border-b border-gray-200 dark:border-sky-400/10"
+          : "bg-white/60 dark:bg-slate-950/70 backdrop-blur-md"
+      }`}>
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 h-20 flex items-center justify-between">
 
-        <h3 className="text-lg md:text-xl font-bold text-blue-200">
-          AK Web Flair Technologies
-        </h3>
+          <div className="flex items-center gap-3 cursor-pointer">
+            <img src="/images/logo.jpg" alt="Logo" className="w-11 h-11 rounded-xl object-cover shadow-md" />
+            <div>
+              <h1 className="text-lg font-bold bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent">
+                AK WebFlair
+              </h1>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 tracking-widest">TECHNOLOGIES</p>
+            </div>
+          </div>
 
-        {/* Desktop Nav */}
-        <ul className="hidden md:flex gap-6 ml-auto">
-          {navLinks.map((link) => (
-            <li key={link.id}>
-              <a
-                href={`#${link.id}`}
-                className={`transition-colors duration-200 ${
-                  activeLink === link.id
-                    ? "text-yellow-300"
-                    : "hover:text-blue-300"
-                }`}
-              >
+          <div className="hidden lg:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <button key={link.id} onClick={() => handleNavClick(link)}
+                className={`text-sm transition ${
+                  active === link.id ? "text-primary" : "text-gray-700 dark:text-gray-300 hover:text-primary"
+                }`}>
                 {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
+              </button>
+            ))}
+            <button onClick={toggleTheme} className="p-2 rounded-lg bg-gray-100 dark:bg-white/10">
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button className="px-5 py-2 rounded-full bg-primary text-white text-sm">Let's Talk</button>
+          </div>
 
-      {/* Mobile Nav */}
+          <div className="flex items-center gap-3 lg:hidden">
+            <button onClick={toggleTheme} className="p-2 rounded-lg bg-gray-100 dark:bg-white/10">
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button className="p-2 rounded-lg bg-gray-100 dark:bg-white/10" onClick={() => setIsOpen(true)}>
+              <Menu size={22} />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {showComingSoon && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] bg-primary text-white text-xs px-4 py-2 rounded-full shadow-lg">
+          🚀 Coming Soon!
+        </div>
+      )}
+
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ duration: 0.3 }}
-            className="fixed top-0 left-0 w-[80%] h-screen bg-gray-900 text-white z-40 md:hidden shadow-xl overflow-y-auto"
-          >
-            <div className="flex items-center justify-between px-4 py-4 border-b border-blue-800">
-              <h3 className="text-lg font-bold text-blue-300">
-                AK Web Flair Technologies
-              </h3>
-              <button onClick={() => setIsOpen(false)} className="text-white">
-                <X size={24} />
-              </button>
-            </div>
-
-            <motion.ul
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: {
-                  transition: {
-                    staggerChildren: 0.1,
-                  },
-                },
-              }}
-              className="flex flex-col px-6 py-6 gap-6"
+          <>
+            <motion.div className="fixed inset-0 bg-black/40 z-40" onClick={() => setIsOpen(false)} />
+            <motion.div
+              initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
+              className="fixed top-0 left-0 h-screen w-[80%] max-w-[320px] bg-white dark:bg-slate-950 z-50 p-6 flex flex-col"
             >
+              <div className="flex justify-between items-center mb-8">
+                <span className="font-bold text-primary">Menu</span>
+                <button onClick={() => setIsOpen(false)}><X /></button>
+              </div>
               {navLinks.map((link) => (
-                <motion.li
-                  key={link.id}
-                  variants={{
-                    hidden: { opacity: 0, x: -20 },
-                    visible: { opacity: 1, x: 0 },
-                  }}
-                >
-                  <a
-                    href={`#${link.id}`}
-                    onClick={() => setIsOpen(false)}
-                    className={`block text-lg font-medium tracking-wide transition-colors duration-200 ${
-                      activeLink === link.id
-                        ? "text-yellow-300"
-                        : "text-white hover:text-blue-400"
-                    }`}
-                  >
-                    {link.label}
-                  </a>
-                </motion.li>
+                <button key={link.id} onClick={() => handleNavClick(link)}
+                  className="text-left py-3 text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-white/5">
+                  {link.label}
+                </button>
               ))}
-            </motion.ul>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 };
 

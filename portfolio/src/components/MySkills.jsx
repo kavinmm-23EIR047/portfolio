@@ -1,147 +1,158 @@
-// src/components/MySkills.jsx
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay, Navigation } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import "swiper/css/navigation";
+
 import { motion } from "framer-motion";
 import {
   FaReact,
   FaServer,
   FaCode,
   FaCogs,
+  FaCloud,
 } from "react-icons/fa";
 
-const skills = [
+const expertise = [
   {
     id: 1,
-    icon: <FaReact size={50} className="text-cyan-400 animate-pulse" />,
-    title: "Frontend",
-    type: "Frontend Developer",
-    children: [
-      { name: "HTML", icon: "https://cdn.simpleicons.org/html5/E34F26" },
-      { name: "CSS", icon: "https://cdn.simpleicons.org/css3/1572B6" },
-      { name: "React.js", icon: "https://cdn.simpleicons.org/react/61DAFB" },
-      { name: "Flutter", icon: "https://cdn.simpleicons.org/flutter/02569B" },
-      { name: "Tailwind CSS", icon: "https://cdn.simpleicons.org/tailwindcss/38BDF8" },
-    ],
+    icon: <FaReact size={42} className="text-sky-500" />,
+    title: "Frontend Engineering",
+    description: "Modern responsive interfaces and scalable frontend systems.",
+    stack: ["React", "Flutter", "Tailwind", "JavaScript", "UI/UX"],
   },
   {
     id: 2,
-    icon: <FaServer size={50} className="text-yellow-400 animate-pulse" />,
-    title: "Backend & Database",
-    type: "Full Stack Developer",
-    children: [
-      { name: "Node.js", icon: "https://cdn.simpleicons.org/nodedotjs/339933" },
-      { name: "Express.js", icon: "https://cdn.simpleicons.org/express/000000" },
-      { name: "Firebase", icon: "https://cdn.simpleicons.org/firebase/FFCA28" },
-      { name: "MongoDB", icon: "https://cdn.simpleicons.org/mongodb/47A248" },
-      { name: "SQL", icon: "https://cdn.simpleicons.org/mysql/4479A1" },
-    ],
+    icon: <FaServer size={42} className="text-indigo-500" />,
+    title: "Backend Systems",
+    description: "Robust APIs, server-side architecture and databases.",
+    stack: ["Node.js", "Express", "MongoDB", "SQL", "Firebase"],
+  },
+  {
+    id: 3,
+    icon: <FaCode size={42} className="text-emerald-500" />,
+    title: "Software Development",
+    description: "Business applications and enterprise-grade solutions.",
+    stack: ["Java", "Python", "C", "JavaScript"],
   },
   {
     id: 4,
-    icon: <FaCode size={50} className="text-green-400 animate-pulse" />,
-    title: "Programming",
-    type: "Software Developer",
-    children: [
-      { name: "C", icon: "https://cdn.simpleicons.org/c/00599C" },
-      { name: "Java", icon: "https://cdn.simpleicons.org/java/007396" },
-      { name: "Python", icon: "https://cdn.simpleicons.org/python/3776AB" },
-      { name: "JavaScript", icon: "https://cdn.simpleicons.org/javascript/F7DF1E" },
-    ],
+    icon: <FaCogs size={42} className="text-amber-500" />,
+    title: "Automation & Embedded",
+    description: "Industrial automation and intelligent hardware solutions.",
+    stack: ["Embedded", "IoT", "PLC", "Robotics", "AI"],
   },
   {
     id: 5,
-    icon: <FaCogs size={50} className="text-indigo-400 animate-pulse" />,
-    title: "Core Engineering",
-    type: "Embedded/Automation Engineer",
-    children: [
-      { name: "Embedded Systems", icon: "https://cdn.simpleicons.org/arduino/00979D" },
-      { name: "VLSI", icon: "https://cdn.simpleicons.org/xilinx/E21F26" },
-      { name: "Industrial Automation", icon: "https://cdn.simpleicons.org/siemens/009999" },
-      { name: "Robotics & AI", icon: "https://cdn.simpleicons.org/openai/412991" },
-    ],
-  },
-  {
-    id: 6,
-    icon: <FaCogs size={50} className="text-orange-400 animate-pulse" />,
-    title: "Tools & DevOps",
-    type: "DevOps & Deployment",
-    children: [
-      { name: "Git", icon: "https://cdn.simpleicons.org/git/F05032" },
-      { name: "GitHub", icon: "https://cdn.simpleicons.org/github/FFFFFF" },
-      { name: "VS Code", icon: "https://cdn.simpleicons.org/visualstudiocode/007ACC" },
-      { name: "Postman", icon: "https://cdn.simpleicons.org/postman/FF6C37" },
-      { name: "Firebase", icon: "https://cdn.simpleicons.org/firebase/FFCA28" },
-      { name: "Vercel", icon: "https://cdn.simpleicons.org/vercel/FFFFFF" },
-      { name: "Render", icon: "https://cdn.simpleicons.org/render/46E3B7" },
-    ],
+    icon: <FaCloud size={42} className="text-cyan-500" />,
+    title: "Cloud & Deployment",
+    description: "Deployment pipelines and cloud-ready platforms.",
+    stack: ["GitHub", "Vercel", "Render", "Postman", "DevOps"],
   },
 ];
 
-const MySkills = () => {
+const Expertise = () => {
   return (
-    <section 
-     id="myskills"
-    className="py-20 px-4 bg-gradient-to-b from-gray-950 to-gray-900 text-white">
-      <motion.h2
-        className="text-center text-3xl md:text-5xl font-extrabold mb-10"
-        initial={{ opacity: 0, y: -50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-      >
-        My <span className="text-blue-500">Skills</span>
-      </motion.h2>
+    <section
+      id="expertise"
+      className="relative py-24 bg-transparent"
+    >
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10">
 
-      <Swiper
-        modules={[Pagination, Autoplay, Navigation]}
-        spaceBetween={20}
-        slidesPerView={1}
-        breakpoints={{
-          550: { slidesPerView: 2 },
-          800: { slidesPerView: 3 },
-          1200: { slidesPerView: 4 },
-        }}
-        pagination={{ clickable: true }}
-        navigation={true}
-        autoplay={{ delay: 3000, disableOnInteraction: false }}
-        className="w-full max-w-6xl mx-auto"
-      >
-        {skills.map((skill) => (
-          <SwiperSlide key={skill.id}>
-            <motion.div
-              className="bg-gradient-to-b from-gray-800 to-gray-900 min-h-[360px] h-full p-6 rounded-2xl shadow-xl flex flex-col items-center justify-between text-center transition-transform duration-300 hover:scale-105"
-              whileHover={{ scale: 1.07 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex flex-col items-center gap-2">
-                {skill.icon}
-                <h3 className="text-xl font-semibold mt-2">{skill.title}</h3>
-                <p className="text-sm text-gray-400">{skill.type}</p>
-              </div>
+        {/* Heading */}
+        <motion.div
+          initial={{ opacity: 0, y: -40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center mb-14"
+        >
+          <p className="text-sky-500 text-sm uppercase tracking-[3px] mb-3">
+            Technology Stack
+          </p>
 
-              <div className="flex flex-wrap justify-center gap-2 mt-5">
-                {skill.children.map((child, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-1 bg-gray-700 px-3 py-1 rounded-full shadow-sm"
-                  >
-                    <img
-                      src={child.icon}
-                      alt={child.name}
-                      className="h-4 w-4 object-contain"
-                    />
-                    <span className="text-sm text-white">{child.name}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+            Our{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-500">
+              Expertise
+            </span>
+          </h2>
+
+          <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            We leverage modern technologies to build scalable digital products.
+          </p>
+        </motion.div>
+
+        {/* Slider */}
+        <Swiper
+          modules={[Pagination, Autoplay]}
+          spaceBetween={24}
+          slidesPerView={1}
+          autoplay={{
+            delay: 2800,
+            disableOnInteraction: false,
+          }}
+          pagination={{ clickable: true }}
+          breakpoints={{
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+            1280: { slidesPerView: 4 },
+          }}
+          className="pb-14"
+        >
+          {expertise.map((item) => (
+            <SwiperSlide key={item.id}>
+              <motion.div
+                whileHover={{ y: -10, scale: 1.04 }}
+                transition={{ duration: 0.3 }}
+                className="
+                h-full rounded-2xl p-6
+                bg-white/70 dark:bg-white/5
+                backdrop-blur-xl
+                border border-black/10 dark:border-white/10
+                shadow-lg
+                hover:shadow-sky-500/20
+                transition
+                "
+              >
+                {/* Icon */}
+                <div className="mb-5">{item.icon}</div>
+
+                {/* Title */}
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                  {item.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-7 mb-5">
+                  {item.description}
+                </p>
+
+                {/* Stack */}
+                <div className="flex flex-wrap gap-2">
+                  {item.stack.map((tech, index) => (
+                    <span
+                      key={index}
+                      className="
+                      px-3 py-1 rounded-full text-xs
+                      bg-white/70 dark:bg-slate-800/60
+                      backdrop-blur-md
+                      border border-black/10 dark:border-white/10
+                      text-gray-800 dark:text-gray-300
+                      "
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+              </motion.div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+
+      </div>
     </section>
   );
 };
 
-export default MySkills;
+export default Expertise;

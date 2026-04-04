@@ -6,60 +6,44 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { FaGithub } from "react-icons/fa";
 import { FiExternalLink } from "react-icons/fi";
+import { motion } from "framer-motion";
 
 const projects = [
   {
     id: 1,
-    title: "AI-POWERED-STUDENT-ASSESSMENT-TEST-WITH-CHATBOT",
+    title: "AI-Powered Student Assessment Platform",
     description:
-      "AI-based assessment project built during a national-level hackathon.",
+      "AI-driven assessment platform with chatbot integration.",
     img: "/images/project1.png",
     github:
       "https://github.com/kavinmm-23EIR047/AI-POWERED-STUDENT-ASSESSMENT-TEST-WITH-CHATBOT",
     website: "#",
   },
   {
-    id: 6,
-    title: "Memories Platform Holidays Pvt Ltd",
+    id: 2,
+    title: "Memories Platform Holidays",
     description:
-      "Built a feature-rich travel platform tailored for a happy travel agency client.",
+      "Premium travel booking platform with modern UI.",
     img: "/images/project6.png",
     github: "https://github.com/kavinmm-23EIR047/Memories-Platform-Holidays",
     website: "https://memories-platform-holidays.vercel.app",
   },
   {
-    id: 2,
-    title: "Internship @ Prodigy InfoTech",
-    description:
-      "Worked on multiple frontend projects during a 1-month internship program.",
-    img: "/images/project3.png",
-    github: "https://github.com/kavinmm-23EIR047/Prodigy-InfoTech",
-    website: "#",
-  },
-  {
     id: 3,
-    title: "Internship @ CodSoft",
-    description: "Developed practical projects and learned web technologies.",
-    img: "/images/project2.jpg",
-    github: "https://github.com/kavinmm-23EIR047/Codsoft",
-    website: "#",
-  },
-  {
-    id: 4,
-    title: "Food Order Website",
+    title: "Food Delivery Web Platform",
     description:
-      "A responsive food delivery website developed during college tech activity.",
+      "Responsive food ordering system with smooth UX.",
     img: "/images/project4.png",
     github: "https://github.com/kavinmm-23EIR047/food-order-website",
     website: "#",
   },
   {
-    id: 5,
-    title: "Internship @ CodeClause",
+    id: 4,
+    title: "Frontend Internship Solutions",
     description:
-      "Built multiple mini-projects using HTML, CSS, JavaScript & React.",
-    img: "/images/project5.jpg",
-    github: "https://github.com/kavinmm-23EIR047/CodeClause-Internship",
+      "Real-world frontend solutions during internships.",
+    img: "/images/project3.png",
+    github: "https://github.com/kavinmm-23EIR047/Prodigy-InfoTech",
     website: "#",
   },
 ];
@@ -69,86 +53,131 @@ const Portfolio = () => {
   const nextRef = useRef(null);
 
   return (
-    <section className="py-16 bg-[#0f172a] text-white text-center relative">
-      <h2 className="text-4xl font-bold mb-8 tracking-wide">
-        <span className="text-blue-500">My </span>Work
-      </h2>
+    <section
+      id="portfolio"
+      className="relative py-20 bg-transparent"
+    >
+      <div className="relative z-10 max-w-7xl mx-auto px-5">
 
-      <div className="max-w-[90%] sm:max-w-[90%] md:max-w-[80%] lg:max-w-[85%] xl:max-w-[85%] mx-auto relative">
-        <Swiper
-          modules={[Pagination, Autoplay, Navigation]}
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 3000, disableOnInteraction: false }}
-          navigation={{
-            prevEl: prevRef.current,
-            nextEl: nextRef.current,
-          }}
-          onBeforeInit={(swiper) => {
-            swiper.params.navigation.prevEl = prevRef.current;
-            swiper.params.navigation.nextEl = nextRef.current;
-          }}
-          spaceBetween={20}
-          breakpoints={{
-            320: { slidesPerView: 1 },
-            480: { slidesPerView: 1.2 },
-            640: { slidesPerView: 2 },
-            768: { slidesPerView: 2.5 },
-            1024: { slidesPerView: 3 },
-            1280: { slidesPerView: 4 },
-          }}
+        {/* Heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center mb-14"
         >
-          {projects.map((project) => (
-            <SwiperSlide key={project.id}>
-              <div className="bg-white/5 border border-gray-700 backdrop-blur-md p-5 rounded-xl shadow-xl transition-transform duration-300 hover:-translate-y-2 flex flex-col justify-between min-h-[380px]">
-                <img
-                  src={project.img}
-                  alt={project.title}
-                  className="w-full h-48 object-cover rounded-md border border-gray-700"
-                />
-                <div className="mt-4 flex-1 flex flex-col justify-between text-left">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white truncate">
+          <p className="text-sky-500 uppercase tracking-[4px] text-sm mb-3">
+            Client Success
+          </p>
+
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+            Our{" "}
+            <span className="bg-gradient-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">
+              Work
+            </span>
+          </h2>
+
+          <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mt-4 text-sm md:text-base">
+            Explore innovative digital products and client platforms.
+          </p>
+        </motion.div>
+
+        {/* Swiper */}
+        <div className="relative">
+          <Swiper
+            modules={[Pagination, Autoplay, Navigation]}
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 3500 }}
+            navigation={{
+              prevEl: prevRef.current,
+              nextEl: nextRef.current,
+            }}
+            onBeforeInit={(swiper) => {
+              swiper.params.navigation.prevEl = prevRef.current;
+              swiper.params.navigation.nextEl = nextRef.current;
+            }}
+            spaceBetween={24}
+            breakpoints={{
+              320: { slidesPerView: 1 },
+              640: { slidesPerView: 1.4 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+          >
+            {projects.map((project) => (
+              <SwiperSlide key={project.id}>
+                <motion.div
+                  whileHover={{ y: -10, scale: 1.03 }}
+                  transition={{ duration: 0.3 }}
+                  className="
+                  rounded-2xl overflow-hidden h-full
+                  bg-white/70 dark:bg-white/5
+                  backdrop-blur-xl
+                  border border-black/10 dark:border-white/10
+                  shadow-lg hover:shadow-sky-500/20
+                  transition
+                  "
+                >
+                  {/* Image */}
+                  <img
+                    src={project.img}
+                    alt={project.title}
+                    className="w-full h-52 object-cover"
+                  />
+
+                  {/* Content */}
+                  <div className="p-5">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {project.title}
                     </h3>
-                    <p className="text-gray-300 text-sm mt-1 line-clamp-2">
+
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-3 leading-6 min-h-[80px]">
                       {project.description}
                     </p>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 bg-[#1f2937] hover:bg-[#374151] text-white px-4 py-2 rounded-lg text-sm transition-all"
-                    >
-                      <FaGithub className="text-base" />
-                      GitHub
-                    </a>
-                    <a
-                      href={project.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-all"
-                    >
-                      <FiExternalLink className="text-base" />
-                      Visit
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </SwiperSlide>
-          ))}
 
-          {/* Navigation Arrows */}
-          <div
+                    {/* Buttons */}
+                    <div className="mt-5 flex gap-3">
+                      <a
+                        href={project.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 px-4 py-2 rounded-xl text-sm"
+                      >
+                        <FaGithub /> Code
+                      </a>
+
+                      <a
+                        href={project.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-xl text-sm"
+                      >
+                        <FiExternalLink /> Live
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+
+          {/* Arrows */}
+          <button
             ref={prevRef}
-            className="swiper-button-prev font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-full w-10 h-10 flex items-center justify-center absolute top-1/2 left-0 transform -translate-y-1/2 z-50 cursor-pointer"
-          />
-          <div
+            className="absolute top-1/2 -left-4 z-20 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white w-10 h-10 rounded-full"
+          >
+            ←
+          </button>
+
+          <button
             ref={nextRef}
-            className="swiper-button-next font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-full w-10 h-10 flex items-center justify-center absolute top-1/2 right-0 transform -translate-y-1/2 z-50 cursor-pointer"
-          />
-        </Swiper>
+            className="absolute top-1/2 -right-4 z-20 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white w-10 h-10 rounded-full"
+          >
+            →
+          </button>
+        </div>
+
       </div>
     </section>
   );

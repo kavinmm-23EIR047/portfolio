@@ -1,157 +1,275 @@
+import React, { useState, useEffect } from "react";
 import { Typewriter } from "react-simple-typewriter";
 import { motion } from "framer-motion";
-import { FaLinkedin, FaInstagram, FaGithub } from "react-icons/fa";
-import React, { useEffect, useRef } from "react";
+import confetti from "canvas-confetti"; // ✅ added
+
+import {
+  FaLinkedin,
+  FaInstagram,
+  FaGithub,
+  FaWhatsapp,
+} from "react-icons/fa";
 
 const Hero = () => {
-  const canvasRef = useRef();
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [status, setStatus] = useState("Computer starts...");
+  const [isPlayerTurn, setIsPlayerTurn] = useState(false);
 
   const scrollToContact = () => {
-    const contactSection = document.getElementById("contact");
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("contact")?.scrollIntoView({
+      behavior: "smooth",
+    });
+  };
+
+  const checkWinner = (b) => {
+    const lines = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6],
+    ];
+    for (let [a,x,y] of lines) {
+      if (b[a] && b[a] === b[x] && b[a] === b[y]) return b[a];
+    }
+    return null;
+  };
+
+  const computerMove = (currentBoard) => {
+    const empty = currentBoard
+      .map((v,i)=> v===null?i:null)
+      .filter(v=>v!==null);
+
+    if (!empty.length) {
+      setStatus("Match Draw 🤝");
+      return;
+    }
+
+    const randomIndex = empty[Math.floor(Math.random()*empty.length)];
+    const updated = [...currentBoard];
+    updated[randomIndex] = "O";
+    setBoard(updated);
+
+    const winner = checkWinner(updated);
+
+    if (winner) {
+      setStatus("Computer wins 🤖");
+      setIsPlayerTurn(false);
+    } else {
+      setStatus("Your turn ✨");
+      setIsPlayerTurn(true);
     }
   };
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    const letters = "01<>/[]{}constletfunctionreturn";
-    const fontSize = 14;
-    let columns, drops;
-
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      columns = Math.floor(canvas.width / fontSize);
-      drops = Array(columns).fill(1);
-    };
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
-    const draw = () => {
-      ctx.fillStyle = "rgba(10, 25, 47, 0.15)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#3b82f6";
-      ctx.font = `${fontSize}px monospace`;
-
-      drops.forEach((y, i) => {
-        const text = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillText(text, i * fontSize, y * fontSize);
-
-        if (y * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-
-        drops[i]++;
-      });
-    };
-
-    const interval = setInterval(draw, 50);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("resize", resizeCanvas);
-    };
+    const timer = setTimeout(() => {
+      computerMove(Array(9).fill(null));
+    }, 700);
+    return () => clearTimeout(timer);
   }, []);
 
+  const handleClick = (i) => {
+    if (!isPlayerTurn || board[i] || checkWinner(board)) return;
+
+    const updated = [...board];
+    updated[i] = "X";
+    setBoard(updated);
+
+    const winner = checkWinner(updated);
+
+    if (winner) {
+      setStatus("You win 🎉");
+
+      // 🎉 CONFETTI
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 },
+      });
+
+      setIsPlayerTurn(false);
+      return;
+    }
+
+    setStatus("Computer thinking...");
+    setIsPlayerTurn(false);
+    setTimeout(() => computerMove(updated), 600);
+  };
+
+  const resetGame = () => {
+    const fresh = Array(9).fill(null);
+    setBoard(fresh);
+    setStatus("Computer starts...");
+    setIsPlayerTurn(false);
+    setTimeout(() => computerMove(fresh), 700);
+  };
+
+  const socialLinks = [
+    { icon: <FaLinkedin className="text-blue-500 hover:text-blue-600" />, link: "https://www.linkedin.com/in/kavin-m-m-710520272/" },
+    { icon: <FaInstagram className="text-pink-500 hover:text-pink-600" />, link: "https://www.instagram.com/ak_webflair_technologies/" },
+    { icon: <FaGithub className="text-gray-800 dark:text-white hover:text-gray-500" />, link: "https://github.com/kavinmm-23EIR047/" },
+    { icon: <FaWhatsapp className="text-green-500 hover:text-green-600" />, link: "https://wa.me/919600732162" },
+  ];
+
   return (
-    <section className="relative min-h-screen bg-[#0a192f] text-white px-4 overflow-hidden flex items-center justify-center">
-      {/* Fullscreen background canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full z-0"
-      />
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#0a192f]/90 via-[#0a192f]/70 to-[#0a192f] z-10" />
+    <section className="relative w-full flex items-center justify-center py-40 lg:py-44 bg-transparent">
 
-      {/* Centered content */}
-      <div className="relative z-20 max-w-6xl w-full mx-auto text-center flex flex-col items-center justify-center">
-        <motion.h2
-          className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-wide"
-          initial={{ opacity: 0, y: -40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-        >
-          I'm a{" "}
-          <span className="text-blue-400 drop-shadow-lg">
-            <Typewriter
-              words={[
-                "Full Stack Developer",
-                "Creative Coder",
-                "Tech Enthusiast",
-                "UI/UX Lover",
-              ]}
-              loop
-              cursor
-              cursorStyle="|"
-              typeSpeed={100}
-              deleteSpeed={50}
-              delaySpeed={1500}
-            />
-          </span>
-        </motion.h2>
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
 
-        <motion.p
-          className="text-gray-300 text-sm md:text-lg max-w-xl mt-2 md:mt-4 px-4 md:px-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-        >
-          I build beautiful, responsive, and scalable applications with cutting-edge technologies.
-        </motion.p>
+        {/* ✅ FIXED HEIGHT ALIGN */}
+        <div className="grid lg:grid-cols-2 gap-10 items-center lg:min-h-[500px]">
 
-        {/* CTA Buttons */}
-        <div className="mt-8 flex gap-4 flex-wrap justify-center">
-          <a
-            href="/kavinresumeintern.pdf"
-            download
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* LEFT */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col justify-center"
           >
-            <motion.button
-              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-full text-lg font-semibold shadow-md transition-transform backdrop-blur-md"
-              whileHover={{ scale: 1.1 }}
-            >
-              View Resume
-            </motion.button>
-          </a>
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full border border-sky-400/30 bg-sky-400/10 text-sky-500 text-xs w-fit">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              Building AI SaaS Products
+            </div>
 
-          <motion.button
-            className="px-6 py-2 bg-transparent border border-blue-400 hover:bg-blue-600 hover:text-white rounded-full text-lg font-semibold transition-all duration-300"
-            whileHover={{ scale: 1.1 }}
-            onClick={scrollToContact}
-          >
-            Contact Me
-          </motion.button>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+              We Build{" "}
+              <span className="bg-gradient-to-r from-sky-500 to-indigo-500 text-transparent bg-clip-text">
+                Scalable Products
+              </span>
+            </h1>
+
+            <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-lg">
+              We craft SaaS platforms, AI tools, and automation systems.
+            </p>
+
+           {/* Terminal */}
+<div className="
+  mt-5 rounded-2xl overflow-hidden border shadow-lg
+
+  bg-gray-900 text-white border-gray-800   /* 🌞 Light mode → dark terminal */
+  dark:bg-white dark:text-black dark:border-gray-200  /* 🌙 Dark mode → light terminal */
+
+">
+
+  {/* Top bar */}
+  <div className="flex gap-2 px-4 py-2 bg-gray-800 dark:bg-gray-200">
+    <span className="w-3 h-3 bg-red-400 rounded-full" />
+    <span className="w-3 h-3 bg-yellow-400 rounded-full" />
+    <span className="w-3 h-3 bg-green-400 rounded-full" />
+  </div>
+
+  {/* Content */}
+  <div className="p-4 font-mono text-sm">
+    <p className="text-green-400 dark:text-green-600">
+      $ launching product...
+    </p>
+
+    <Typewriter
+      words={[
+        "Building SaaS platform...",
+        "Designing UI...",
+        "Integrating AI...",
+      ]}
+      loop
+      cursor
+    />
+  </div>
+
+</div>
+
+            {/* Buttons */}
+            <div className="mt-6 flex gap-4 flex-wrap">
+              <button className="px-6 py-3 rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 text-white">
+                View Product
+              </button>
+
+              <button
+                onClick={scrollToContact}
+                className="px-6 py-3 rounded-full border border-gray-300 dark:border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
+              >
+                Get Started
+              </button>
+            </div>
+
+            {/* Social */}
+            <div className="mt-8 flex justify-center gap-6">
+              {socialLinks.map((item, i) => (
+                <a
+                  key={i}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-14 h-14 text-2xl rounded-2xl border border-sky-400/30 bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-md hover:shadow-sky-500/20 transition duration-300 transform hover:scale-110"
+                >
+                  {item.icon}
+                </a>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* RIGHT GAME */}
+         <motion.div
+  initial={{ opacity: 0, x: 40 }}
+  whileInView={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.8 }}
+  className="flex justify-center lg:justify-end items-center h-full"
+>
+  <div className="w-full max-w-[360px] lg:max-w-[420px]">
+
+    {/* 💻 LAPTOP FRAME */}
+    <div className="relative p-[6px] rounded-[28px] bg-gradient-to-br from-sky-500/40 to-indigo-500/40 shadow-2xl">
+
+      <div className="
+        rounded-[24px]
+        bg-gray-900 dark:bg-white
+        p-2
+      ">
+
+        {/* 🔝 TOP BAR (LIKE MAC) */}
+        <div className="flex items-center gap-2 px-3 py-2">
+          <span className="w-3 h-3 bg-red-400 rounded-full" />
+          <span className="w-3 h-3 bg-yellow-400 rounded-full" />
+          <span className="w-3 h-3 bg-green-400 rounded-full" />
         </div>
 
-        {/* Social Icons */}
-        <div className="mt-6 flex gap-6 justify-center text-2xl text-blue-400">
-          <a
-            href="https://www.linkedin.com/in/kavin-m-m-710520272/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-blue-500 transition"
+        {/* 🎮 YOUR ORIGINAL GAME BOX */}
+        <div className="rounded-2xl border p-5 shadow-xl bg-gray-900 text-white border-gray-800 dark:bg-white dark:text-black dark:border-gray-200">
+
+          <div className="text-center mb-4 font-mono">
+            <h3 className="text-lg font-bold">
+              <span className="bg-gradient-to-r from-sky-400 to-indigo-400 text-transparent bg-clip-text">
+                {"< Play_With_AI />"}
+              </span>
+            </h3>
+
+            <p className="text-xs text-green-400 dark:text-green-600">
+              $ {status}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {board.map((cell, i) => (
+              <button
+                key={i}
+                onClick={() => handleClick(i)}
+                className="h-20 sm:h-24 rounded-xl text-xl font-bold bg-white/10 text-white dark:bg-black/10 dark:text-black border border-white/10 dark:border-black/10 hover:scale-105 transition"
+              >
+                {cell}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={resetGame}
+            className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-500 text-white hover:opacity-90 transition"
           >
-            <FaLinkedin />
-          </a>
-          <a
-            href="https://www.instagram.com/ak_webflair_technologies/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-pink-500 transition"
-          >
-            <FaInstagram />
-          </a>
-          <a
-            href="https://github.com/kavinmm-23EIR047/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-gray-300 transition"
-          >
-            <FaGithub />
-          </a>
+            Restart Game
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</motion.div>
         </div>
       </div>
     </section>

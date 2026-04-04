@@ -1,7 +1,14 @@
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { FiUser, FiMail, FiMessageCircle, FiPhone } from "react-icons/fi";
+import {
+  FiUser,
+  FiMail,
+  FiMessageCircle,
+  FiPhone,
+  FiMapPin,
+  FiClock,
+} from "react-icons/fi";
 
 const Contact = () => {
   const { register, handleSubmit, reset } = useForm();
@@ -10,22 +17,19 @@ const Contact = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/contact`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: data.name,
-            email: data.email,
-            phone: data.phone,
-            comment: data.comment,
-          }),
+          body: JSON.stringify(data),
         }
       );
 
       const result = await response.json();
+
       if (response.ok && result.success) {
         setSuccessMessage("✅ Message sent successfully!");
         reset();
@@ -33,7 +37,6 @@ const Contact = () => {
         setSuccessMessage("❌ Failed to send message!");
       }
     } catch (error) {
-      console.error("Error:", error);
       setSuccessMessage("❌ Something went wrong!");
     } finally {
       setIsSubmitting(false);
@@ -42,127 +45,119 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 px-5 bg-[#0a192f] text-white">
-      <motion.h2
-        className="text-4xl font-bold text-center mb-4 text-blue-400"
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        Get in Touch
-      </motion.h2>
+    <section id="contact" className="relative py-20 px-5 bg-transparent">
+      
+      {/* Heading */}
+      <div className="text-center mb-14">
+        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+          Contact{" "}
+          <span className="bg-gradient-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">
+            Us
+          </span>
+        </h2>
 
-      <motion.p
-        className="text-center text-sm text-gray-400 mb-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        Let’s build something amazing together. Reach out to discuss web dev, AI
-        projects, or collaboration ideas!
-      </motion.p>
+        <p className="text-gray-600 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
+          Let’s build scalable digital products together.
+        </p>
+      </div>
 
-      <motion.div
-        className="max-w-2xl mx-auto bg-gray-800 p-8 rounded-xl shadow-xl"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        {successMessage && (
-          <motion.div
-            className={`mb-4 text-center font-semibold ${
-              successMessage.includes("✅")
-                ? "text-green-400"
-                : "text-red-400"
-            }`}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            {successMessage}
-          </motion.div>
-        )}
+      {/* Content */}
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10">
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="relative">
-            <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              {...register("name", { required: true })}
-              placeholder="Your Name"
-              className="w-full pl-10 p-3 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        {/* LEFT */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7 }}
+          viewport={{ once: true }}
+          className="rounded-2xl p-8 bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-black/10 dark:border-white/10 shadow-lg"
+        >
+          <h3 className="text-2xl font-semibold mb-6 text-sky-500">
+            AK Web Flair Technologies
+          </h3>
+
+          <p className="text-gray-600 dark:text-gray-300 mb-8">
+            We provide web, app, SaaS, AI and enterprise solutions.
+          </p>
+
+          <div className="space-y-6">
+            <div className="flex gap-4">
+              <FiMapPin className="text-sky-500 text-xl" />
+              <a
+                href="https://maps.app.goo.gl/qjS4WGGvsoYLscfK9"
+                target="_blank"
+                className="text-gray-600 dark:text-gray-400 hover:text-sky-500"
+              >
+                View Location →
+              </a>
+            </div>
+
+            <div className="flex gap-4">
+              <FiClock className="text-sky-500 text-xl" />
+              <p className="text-gray-600 dark:text-gray-400">
+                24/7 Support
+              </p>
+            </div>
+
+            <div className="flex gap-4">
+              <FiPhone className="text-sky-500 text-xl" />
+              <p className="text-gray-600 dark:text-gray-400">
+                Always available
+              </p>
+            </div>
           </div>
+        </motion.div>
 
-          <div className="relative">
-            <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        {/* RIGHT */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7 }}
+          viewport={{ once: true }}
+          className="rounded-2xl p-8 bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-black/10 dark:border-white/10 shadow-xl"
+        >
+          {successMessage && (
+            <div className="mb-5 text-center font-semibold text-green-500">
+              {successMessage}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+
             <input
-              type="email"
-              {...register("email", { required: true })}
-              placeholder="Your Email"
-              className="w-full pl-10 p-3 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              {...register("name")}
+              placeholder="Name"
+              className="w-full p-3 rounded-xl bg-white/80 dark:bg-slate-800 border border-black/10 dark:border-white/10"
             />
-          </div>
 
-          <div className="relative">
-            <FiPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
-              type="text"
-              {...register("phone", { required: true })}
-              placeholder="Your Phone"
-              className="w-full pl-10 p-3 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              {...register("email")}
+              placeholder="Email"
+              className="w-full p-3 rounded-xl bg-white/80 dark:bg-slate-800 border border-black/10 dark:border-white/10"
             />
-          </div>
 
-          <div className="relative">
-            <FiMessageCircle className="absolute left-3 top-4 text-gray-400" />
+            <input
+              {...register("phone")}
+              placeholder="Phone"
+              className="w-full p-3 rounded-xl bg-white/80 dark:bg-slate-800 border border-black/10 dark:border-white/10"
+            />
+
             <textarea
-              {...register("comment", { required: true })}
-              placeholder="Your Message"
-              className="w-full pl-10 p-3 bg-gray-700 text-white rounded-md h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              {...register("comment")}
+              placeholder="Message"
+              className="w-full p-3 rounded-xl h-32 bg-white/80 dark:bg-slate-800 border border-black/10 dark:border-white/10"
             />
-          </div>
 
-          <motion.button
-            type="submit"
-            disabled={isSubmitting}
-            className={`w-full p-3 rounded-md font-semibold transition-all duration-200 ${
-              isSubmitting
-                ? "bg-blue-300 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
-            whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-            whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8z"
-                  ></path>
-                </svg>
-                Sending...
-              </span>
-            ) : (
-              "Send Message"
-            )}
-          </motion.button>
-        </form>
-      </motion.div>
+            <button
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white"
+            >
+              {isSubmitting ? "Sending..." : "Send Message"}
+            </button>
+          </form>
+        </motion.div>
+
+      </div>
     </section>
   );
 };
