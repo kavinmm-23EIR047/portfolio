@@ -19,7 +19,6 @@ const COMPANY = {
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
 
-  /* FETCH + CLEAN DATA */
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_BACKEND_URL}/api/feedback`)
@@ -33,14 +32,12 @@ const Reviews = () => {
       .catch((err) => console.error("Error fetching reviews:", err));
   }, []);
 
-  /* AVERAGE RATING FIX */
   const avgRating = useMemo(() => {
     if (!reviews.length) return 0;
     const total = reviews.reduce((acc, r) => acc + r.rating, 0);
     return (total / reviews.length).toFixed(1);
   }, [reviews]);
 
-  /* STAR RENDER WITH HALF STAR */
   const renderStars = (rating) => {
     const stars = [];
     const full = Math.floor(rating);
@@ -52,30 +49,45 @@ const Reviews = () => {
       } else if (i === full + 1 && half) {
         stars.push(<FaStarHalfAlt key={i} className="text-yellow-400 text-xs" />);
       } else {
-        stars.push(<FaRegStar key={i} className="text-gray-300 text-xs" />);
+        stars.push(<FaRegStar key={i} className="text-gray-400 text-xs" />);
       }
     }
 
     return <div className="flex gap-0.5">{stars}</div>;
   };
 
+  const getInitials = (name = "") =>
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+
   return (
-    <section className="py-14 px-4 bg-transparent font-[Inter]">
+    <section className="py-14 px-4 bg-transparent font-mono">
       <div className="max-w-6xl mx-auto">
 
         {/* HEADER */}
         <div className="text-center mb-10 flex flex-col items-center">
-          <img
-            src={COMPANY.logo}
-            alt="logo"
-            className="w-14 h-14 rounded-lg object-cover shadow-sm border border-primary/20"
-          />
 
-          <h2 className="mt-4 text-2xl md:text-3xl font-semibold text-primary dark:text-accent">
+          {/* LOGO */}
+          <div className="
+            w-16 h-16 rounded-lg overflow-hidden
+           
+          ">
+            <img
+              src={COMPANY.logo}
+              alt="logo"
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          <h2 className="mt-4 text-2xl md:text-3xl font-bold text-accent dark:text-accent">
             {COMPANY.name}
           </h2>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-lightSubtext dark:text-gray-400 mt-1">
             {COMPANY.address}
           </p>
 
@@ -84,7 +96,7 @@ const Reviews = () => {
               {avgRating}
             </span>
             {renderStars(Number(avgRating))}
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-lightSubtext">
               ({reviews.length})
             </span>
           </div>
@@ -93,9 +105,15 @@ const Reviews = () => {
             href={COMPANY.reviewLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 px-5 py-2 rounded-full text-sm font-medium bg-primary text-white hover:bg-secondary transition"
+            className="
+              mt-5 px-5 py-2 text-sm rounded-md
+              border border-primary/40
+              text-primary dark:text-accent
+              hover:bg-primary hover:text-white
+              transition
+            "
           >
-            Write a Review
+            + Write Review
           </a>
         </div>
 
@@ -118,56 +136,84 @@ const Reviews = () => {
             <SwiperSlide key={i}>
               <div
                 className="
-                  rounded-xl p-4 h-[220px]
-                  bg-white/60 dark:bg-white/5
-                  backdrop-blur-md
-                  border border-gray-200 dark:border-white/10
-                  shadow-sm hover:shadow-md
+                  rounded-lg overflow-hidden
+                  border
+
+                  /* 🔥 THEME INVERSION */
+                  bg-darkCard text-gray-200 border-darkBorder
+                  dark:bg-lightCard dark:text-lightText dark:border-gray-300
+
                   transition-all duration-300
-                  flex flex-col justify-between
                 "
               >
-                {/* TOP */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={review.photo}
-                      onError={(e) => {
-                        e.target.src = `https://ui-avatars.com/api/?name=${review.name}`;
-                      }}
-                      alt={review.name}
-                      className="w-9 h-9 rounded-full object-cover"
-                    />
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                        {review.name}
-                      </h4>
-                      {renderStars(review.rating)}
-                    </div>
-                  </div>
+                {/* 🔴🟡🟢 MAC BAR */}
+                <div className="
+                  flex items-center gap-2 px-3 py-2
+                  border-b border-darkBorder
+                  dark:border-gray-300
+                ">
+                  <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                  <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
+                  <span className="w-3 h-3 rounded-full bg-green-500"></span>
 
-                  <img src={googleLogo} alt="Google" className="w-4 h-4 opacity-70" />
+                  <span className="ml-auto text-[10px] opacity-60">
+                    review.sh
+                  </span>
                 </div>
 
-                {/* COMMENT */}
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mt-2 line-clamp-3">
-                  "{review.comment}"
-                </p>
+                {/* CONTENT */}
+                <div className="p-4 h-[190px] flex flex-col justify-between">
 
-                {/* DATE */}
-                <div className="text-[11px] text-gray-400 mt-2">
-                  {review.date
-                    ? new Date(review.date).toLocaleDateString()
-                    : "Recent"}
+                  {/* TOP */}
+                  <div className="flex justify-between">
+                    <div className="flex gap-3">
+
+                      {/* INITIAL ICON */}
+                      <div className="
+                        w-9 h-9 rounded-md
+                        flex items-center justify-center
+                        text-xs font-bold
+                        bg-primary text-white
+                        dark:bg-accent
+                      ">
+                        {getInitials(review.name)}
+                      </div>
+
+                      <div>
+                        <h4 className="text-sm font-semibold">
+                          {review.name}
+                        </h4>
+                        {renderStars(review.rating)}
+                      </div>
+                    </div>
+
+                    <img
+                      src={googleLogo}
+                      alt="Google"
+                      className="w-4 h-4 opacity-70"
+                    />
+                  </div>
+
+                  {/* COMMENT */}
+                  <p className="text-xs mt-2 opacity-80 line-clamp-3">
+                    "$ {review.comment}"
+                  </p>
+
+                  {/* DATE */}
+                  <div className="text-[10px] opacity-50">
+                    {review.date
+                      ? new Date(review.date).toLocaleDateString()
+                      : "Recent"}
+                  </div>
                 </div>
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
 
-        {/* EMPTY STATE */}
+        {/* EMPTY */}
         {reviews.length === 0 && (
-          <p className="text-center text-gray-400 mt-6 text-sm">
+          <p className="text-center text-lightSubtext mt-6 text-sm">
             No reviews available
           </p>
         )}
@@ -178,7 +224,7 @@ const Reviews = () => {
             href={COMPANY.reviewLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-primary dark:text-accent font-medium hover:underline"
+            className="text-sm text-primary dark:text-accent hover:underline"
           >
             View more reviews →
           </a>
