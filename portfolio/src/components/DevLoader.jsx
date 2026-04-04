@@ -2,28 +2,30 @@ import { useEffect, useState } from "react";
 
 const LINES = [
   { text: "$ npm run dev", type: "prompt" },
-  { text: "> portfolio@1.0.0 dev", type: "output" },
+  { text: "> akwebflairtechnologies@1.0.0 dev", type: "output" },
   { text: "> vite", type: "output" },
   { text: "", type: "output" },
-  { text: "VITE v5.2.0  ready in 143ms", type: "key" },
+  { text: "AK WebFlair Technologies is starting...", type: "key" },
   { text: "", type: "output" },
-  { text: "  ➜  Local:   http://localhost:5173/", type: "success" },
-  { text: "  ➜  Loading components...", type: "output" },
+  {
+    text: "➜  Live: https://akwebflairtechnologies.vercel.app",
+    type: "success",
+  },
+  { text: "➜  Loading components...", type: "output" },
+  { text: "➜  Initializing animations...", type: "output" },
 ];
 
 const STAGES = [
-  { t: 300,  label: "initializing...",        pct: 10 },
-  { t: 800,  label: "loading modules...",     pct: 30 },
-  { t: 1400, label: "bundling assets...",     pct: 55 },
-  { t: 1900, label: "mounting components...",pct: 80 },
-  { t: 2500, label: "ready!",                 pct: 100 },
+  { t: 300, label: "initializing modules...", pct: 15 },
+  { t: 900, label: "loading portfolio sections...", pct: 35 },
+  { t: 1500, label: "bundling assets...", pct: 60 },
+  { t: 2200, label: "rendering UI...", pct: 85 },
+  { t: 3000, label: "welcome to AK WebFlair 🚀", pct: 100 },
 ];
 
-const TOTAL_DURATION = 3000;
+const TOTAL_DURATION = 3500;
 
 export default function DevLoader({ onDone }) {
-
-  /* ✅ FIXED THEME DETECTION */
   const getTheme = () => {
     if (typeof window === "undefined") return false;
 
@@ -41,7 +43,6 @@ export default function DevLoader({ onDone }) {
     pct: 0,
   });
 
-  /* ✅ SYNC WITH HTML CLASS */
   useEffect(() => {
     const updateTheme = () => {
       setIsDark(document.documentElement.classList.contains("dark"));
@@ -57,18 +58,16 @@ export default function DevLoader({ onDone }) {
     return () => obs.disconnect();
   }, []);
 
-  /* ✅ TYPEWRITER EFFECT */
   useEffect(() => {
     const timers = LINES.map((line, i) =>
       setTimeout(() => {
         setVisibleLines((prev) => [...prev, line]);
-      }, 200 + i * 280)
+      }, 200 + i * 250)
     );
 
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  /* ✅ PROGRESS STAGES */
   useEffect(() => {
     const timers = STAGES.map(({ t, label, pct }) =>
       setTimeout(() => setStage({ label, pct }), t)
@@ -77,7 +76,6 @@ export default function DevLoader({ onDone }) {
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  /* ✅ COMPLETE LOADER */
   useEffect(() => {
     if (!onDone) return;
 
@@ -88,22 +86,22 @@ export default function DevLoader({ onDone }) {
     return () => clearTimeout(t);
   }, [onDone]);
 
-  /* 🎨 THEME COLORS */
   const dark = isDark;
 
-  const bg      = dark ? "#0d1117" : "#f5f5f0";
-  const winBg   = dark ? "#161b22" : "#ffffff";
-  const barBg   = dark ? "#21262d" : "#f6f8fa";
-  const border  = dark ? "#30363d" : "#d0d7de";
-  const trackBg = dark ? "#30363d" : "#d0d7de";
-  const accent  = dark ? "#58a6ff" : "#0969da";
-  const muted   = dark ? "#8b949e" : "#57606a";
+  const bg = dark
+    ? "linear-gradient(135deg, #0d1117, #161b22)"
+    : "linear-gradient(135deg, #f8fafc, #ffffff)";
+
+  const winBg = dark ? "#161b22" : "#ffffff";
+  const border = dark ? "#30363d" : "#d0d7de";
+  const accent = dark ? "#58a6ff" : "#2563eb";
+  const muted = dark ? "#8b949e" : "#64748b";
 
   const colors = {
-    prompt:  dark ? "#58a6ff" : "#0969da",
-    output:  dark ? "#8b949e" : "#57606a",
-    success: dark ? "#3fb950" : "#1a7f37",
-    key:     dark ? "#e3b341" : "#9a6700",
+    prompt: accent,
+    output: muted,
+    success: "#22c55e",
+    key: "#f59e0b",
   };
 
   return (
@@ -117,59 +115,119 @@ export default function DevLoader({ onDone }) {
         alignItems: "center",
         justifyContent: "center",
         background: bg,
-        transition: "background 0.3s",
+        transition: "all 0.4s ease",
         fontFamily: "'Courier New', Courier, monospace",
-        padding: "1rem",
+        padding: "16px",
       }}
     >
+      {/* COMPANY BRAND */}
+      <div
+        style={{
+          marginBottom: 24,
+          textAlign: "center",
+          animation: "fadeIn 0.8s ease",
+          width: "100%",
+        }}
+      >
+        <img
+          src="/images/logo.jpg"
+          alt="AK WebFlair Logo"
+          style={{
+            width: "clamp(70px, 15vw, 90px)",
+            height: "clamp(70px, 15vw, 90px)",
+            borderRadius: "50%",
+            objectFit: "cover",
+            border: `3px solid ${accent}`,
+            boxShadow: "0 0 20px rgba(37,99,235,0.3)",
+            display: "block",
+            margin: "0 auto",
+          }}
+        />
+
+        <h2
+          style={{
+            marginTop: 12,
+            fontSize: "clamp(18px, 4vw, 24px)",
+            fontWeight: 700,
+            color: accent,
+            letterSpacing: 1,
+          }}
+        >
+          AK WebFlair Technologies
+        </h2>
+
+        <p
+          style={{
+            fontSize: "clamp(10px, 2.5vw, 13px)",
+            color: muted,
+            wordBreak: "break-word",
+          }}
+        >
+          akwebflairtechnologies.vercel.app
+        </p>
+      </div>
+
       {/* TERMINAL WINDOW */}
       <div
         style={{
           width: "100%",
-          maxWidth: 480,
+          maxWidth: 550,
+          minWidth: 280,
           background: winBg,
-          borderRadius: 10,
+          borderRadius: 16,
           border: `1px solid ${border}`,
           overflow: "hidden",
-          marginBottom: 16,
+          boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+          marginBottom: 20,
         }}
       >
-        {/* TITLE BAR */}
+        {/* TOP BAR */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 6,
-            padding: "10px 14px",
-            background: barBg,
+            gap: 8,
+            padding: "12px 16px",
             borderBottom: `1px solid ${border}`,
+            flexWrap: "wrap",
           }}
         >
           <span style={dot("#ff5f57")} />
           <span style={dot("#ffbd2e")} />
           <span style={dot("#28c840")} />
-          <span style={{ marginLeft: 8, fontSize: 11, color: muted }}>
-            ~/portfolio — dev server
+          <span
+            style={{
+              marginLeft: 10,
+              fontSize: "clamp(10px, 2vw, 12px)",
+              color: muted,
+            }}
+          >
+            AK WebFlair Dev Server
           </span>
         </div>
 
         {/* TERMINAL CONTENT */}
-        <div style={{ padding: "16px 18px", minHeight: 160 }}>
+        <div
+          style={{
+            padding: "16px",
+            minHeight: 180,
+          }}
+        >
           {visibleLines.map((line, i) => (
             <div
               key={i}
               style={{
-                fontSize: 13,
-                lineHeight: 1.9,
+                fontSize: "clamp(11px, 2vw, 13px)",
+                lineHeight: 1.8,
                 color: colors[line.type] || colors.output,
-                whiteSpace: "pre",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
               }}
             >
               {line.text || "\u00A0"}
             </div>
           ))}
 
-          {/* BLINK CURSOR */}
           <span
             style={{
               display: "inline-block",
@@ -177,7 +235,6 @@ export default function DevLoader({ onDone }) {
               height: 14,
               background: accent,
               marginLeft: 2,
-              verticalAlign: "text-bottom",
               animation: "blink 0.8s step-end infinite",
             }}
           />
@@ -185,14 +242,20 @@ export default function DevLoader({ onDone }) {
       </div>
 
       {/* PROGRESS BAR */}
-      <div style={{ width: "100%", maxWidth: 480 }}>
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 550,
+          minWidth: 280,
+        }}
+      >
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            fontSize: 11,
+            fontSize: "clamp(10px, 2vw, 12px)",
             color: muted,
-            marginBottom: 5,
+            marginBottom: 6,
           }}
         >
           <span>{stage.label}</span>
@@ -201,9 +264,9 @@ export default function DevLoader({ onDone }) {
 
         <div
           style={{
-            height: 3,
-            background: trackBg,
-            borderRadius: 2,
+            height: 5,
+            background: border,
+            borderRadius: 10,
             overflow: "hidden",
           }}
         >
@@ -212,25 +275,37 @@ export default function DevLoader({ onDone }) {
               height: "100%",
               width: `${stage.pct}%`,
               background: accent,
-              borderRadius: 2,
               transition: "width 0.5s ease",
             }}
           />
         </div>
       </div>
 
-      {/* BLINK ANIMATION */}
       <style>
-        {`@keyframes blink { 50% { opacity: 0; } }`}
+        {`
+          @keyframes blink {
+            50% { opacity: 0; }
+          }
+
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(-15px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
       </style>
     </div>
   );
 }
 
-/* 🔧 helper */
 const dot = (color) => ({
-  width: 11,
-  height: 11,
+  width: 12,
+  height: 12,
   borderRadius: "50%",
   background: color,
   display: "inline-block",
