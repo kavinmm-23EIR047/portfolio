@@ -4,7 +4,7 @@ import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import axios from "axios";
-import { FaStar, FaRegStar } from "react-icons/fa";
+import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
 
 const googleLogo =
   "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png";
@@ -19,31 +19,43 @@ const COMPANY = {
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
 
+  /* FETCH + CLEAN DATA */
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_BACKEND_URL}/api/feedback`)
-      .then((res) => setReviews(res.data.reviews || []))
+      .then((res) => {
+        const cleaned = (res.data.reviews || []).map((r) => ({
+          ...r,
+          rating: Number(r.rating) || 0,
+        }));
+        setReviews(cleaned);
+      })
       .catch((err) => console.error("Error fetching reviews:", err));
   }, []);
 
+  /* AVERAGE RATING FIX */
   const avgRating = useMemo(() => {
     if (!reviews.length) return 0;
-    const total = reviews.reduce((acc, r) => acc + (r.rating || 0), 0);
+    const total = reviews.reduce((acc, r) => acc + r.rating, 0);
     return (total / reviews.length).toFixed(1);
   }, [reviews]);
 
+  /* STAR RENDER WITH HALF STAR */
   const renderStars = (rating) => {
     const stars = [];
-    const num = Math.round(Number(rating));
+    const full = Math.floor(rating);
+    const half = rating % 1 >= 0.5;
+
     for (let i = 1; i <= 5; i++) {
-      stars.push(
-        i <= num ? (
-          <FaStar key={i} className="text-yellow-400 text-xs" />
-        ) : (
-          <FaRegStar key={i} className="text-gray-300 text-xs" />
-        )
-      );
+      if (i <= full) {
+        stars.push(<FaStar key={i} className="text-yellow-400 text-xs" />);
+      } else if (i === full + 1 && half) {
+        stars.push(<FaStarHalfAlt key={i} className="text-yellow-400 text-xs" />);
+      } else {
+        stars.push(<FaRegStar key={i} className="text-gray-300 text-xs" />);
+      }
     }
+
     return <div className="flex gap-0.5">{stars}</div>;
   };
 
@@ -71,7 +83,7 @@ const Reviews = () => {
             <span className="text-lg font-semibold text-primary dark:text-accent">
               {avgRating}
             </span>
-            {renderStars(avgRating)}
+            {renderStars(Number(avgRating))}
             <span className="text-xs text-gray-500">
               ({reviews.length})
             </span>
@@ -119,10 +131,10 @@ const Reviews = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <img
-                      src={
-                        review.photo ||
-                        `https://ui-avatars.com/api/?name=${review.name}`
-                      }
+                      src={review.photo}
+                      onError={(e) => {
+                        e.target.src = `https://ui-avatars.com/api/?name=${review.name}`;
+                      }}
                       alt={review.name}
                       className="w-9 h-9 rounded-full object-cover"
                     />
@@ -152,6 +164,13 @@ const Reviews = () => {
             </SwiperSlide>
           ))}
         </Swiper>
+
+        {/* EMPTY STATE */}
+        {reviews.length === 0 && (
+          <p className="text-center text-gray-400 mt-6 text-sm">
+            No reviews available
+          </p>
+        )}
 
         {/* VIEW MORE */}
         <div className="text-center mt-8">
