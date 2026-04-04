@@ -106,76 +106,72 @@ const Portfolio = () => {
             }}
           >
             {projects.map((project) => (
-              <SwiperSlide key={project.id}>
-                <motion.div
-                  whileHover={{ y: -10, scale: 1.03 }}
-                  transition={{ duration: 0.3 }}
-                  className="
-                  rounded-2xl overflow-hidden h-full
-                  bg-white/70 dark:bg-white/5
-                  backdrop-blur-xl
-                  border border-black/10 dark:border-white/10
-                  shadow-lg hover:shadow-sky-500/20
-                  transition
-                  "
-                >
-                  {/* Image */}
-                  <img
-                    src={project.img}
-                    alt={project.title}
-                    className="w-full h-52 object-cover"
-                  />
+              <SwiperSlide key={project.id} className="h-auto">
+  <motion.div
+    whileHover={{ y: -10, scale: 1.03 }}
+    transition={{ duration: 0.3 }}
+    className="
+      h-full flex flex-col
+      rounded-2xl overflow-hidden
+      bg-white/70 dark:bg-white/5
+      backdrop-blur-xl
+      border border-black/10 dark:border-white/10
+      shadow-lg hover:shadow-sky-500/20
+      transition
+    "
+  >
+    {/* Image */}
+    <img
+      src={project.img}
+      alt={project.title}
+      className="w-full h-48 object-cover flex-shrink-0"
+    />
 
-                  {/* Content */}
-                  <div className="p-5">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {project.title}
-                    </h3>
+    {/* Content */}
+    <div className="p-5 flex flex-col flex-1">
+      
+      {/* Title */}
+      <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-2">
+        {project.title}
+      </h3>
 
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-3 leading-6 min-h-[80px]">
-                      {project.description}
-                    </p>
+      {/* Description */}
+      <p className="text-gray-600 dark:text-gray-400 text-sm mt-3 leading-6 line-clamp-3">
+        {project.description}
+      </p>
 
-                    {/* Buttons */}
-                    <div className="mt-5 flex gap-3">
-                      <a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 px-4 py-2 rounded-xl text-sm"
-                      >
-                        <FaGithub /> Code
-                      </a>
+      {/* Spacer (push buttons down) */}
+      <div className="flex-grow" />
 
-                      <a
-                        href={project.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-xl text-sm"
-                      >
-                        <FiExternalLink /> Live
-                      </a>
-                    </div>
-                  </div>
-                </motion.div>
-              </SwiperSlide>
+      {/* Buttons */}
+      <div className="mt-4 flex gap-3">
+        <a
+          href={project.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 flex items-center justify-center gap-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 px-4 py-2 rounded-lg text-sm"
+        >
+          <FaGithub /> Code
+        </a>
+
+        <a
+          href={project.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg text-sm"
+        >
+          <FiExternalLink /> Live
+        </a>
+      </div>
+    </div>
+  </motion.div>
+</SwiperSlide>
             ))}
           </Swiper>
 
-          {/* Arrows */}
-          <button
-            ref={prevRef}
-            className="absolute top-1/2 -left-4 z-20 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white w-10 h-10 rounded-full"
-          >
-            ←
-          </button>
+         
 
-          <button
-            ref={nextRef}
-            className="absolute top-1/2 -right-4 z-20 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white w-10 h-10 rounded-full"
-          >
-            →
-          </button>
+          
         </div>
 
       </div>

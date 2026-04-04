@@ -1,3 +1,5 @@
+
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -5,8 +7,13 @@ import bodyParser from 'body-parser';
 import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
 import feedbackRoutes from './feedbackRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -117,39 +124,181 @@ async function processContactInBackground({ name, email, phone, comment }) {
       secure: true,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // Gmail App Password
+        pass: process.env.EMAIL_PASS,
       },
-      pool: true, // Use connection pooling
+      pool: true,
       maxConnections: 1,
       maxMessages: 3,
     });
 
-    // Admin email
+    // Logo path: backend is sibling of portfolio, so go up one level
+    const logoPath = path.join(__dirname, '..', 'portfolio', 'public', 'images', 'logo.jpg');
+
+    /* ---------- ADMIN EMAIL ---------- */
     const adminMail = {
-      from: `"Project Contact" <${process.env.EMAIL_USER}>`,
+      from: `"AK Webflair Technologies" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       subject: `📬 New Contact Message from ${name}`,
       html: `
-        <h3>New Contact Submission</h3>
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Phone:</b> ${phone}</p>
-        <p><b>Comment:</b> ${comment}</p>
-        <p><i>${timestamp}</i></p>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>New Contact - AK Webflair Technologies</title>
+        </head>
+        <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:'Segoe UI',Arial,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(14,165,233,0.10);">
+
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%);padding:32px 40px;text-align:center;">
+                      <img src="cid:akwlogo" alt="AK Webflair Technologies" style="height:56px;max-width:220px;object-fit:contain;margin-bottom:14px;display:block;margin-left:auto;margin-right:auto;" />
+                      <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:0.5px;">New Contact Message</h1>
+                      <p style="margin:6px 0 0;color:#bae6fd;font-size:13px;">AK Webflair Technologies — Admin Notification</p>
+                    </td>
+                  </tr>
+
+                  <!-- BODY -->
+                  <tr>
+                    <td style="padding:36px 40px;">
+                      <p style="margin:0 0 24px;color:#475569;font-size:15px;">You have received a new contact form submission. Here are the details:</p>
+
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="padding:12px 16px;background:#f8fafc;border-left:4px solid #0ea5e9;border-radius:4px;margin-bottom:10px;">
+                            <span style="font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Name</span><br/>
+                            <span style="font-size:16px;color:#0f172a;font-weight:600;">${name}</span>
+                          </td>
+                        </tr>
+                        <tr><td style="height:10px;"></td></tr>
+                        <tr>
+                          <td style="padding:12px 16px;background:#f8fafc;border-left:4px solid #6366f1;border-radius:4px;">
+                            <span style="font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Email</span><br/>
+                            <span style="font-size:16px;color:#0f172a;font-weight:600;">${email}</span>
+                          </td>
+                        </tr>
+                        <tr><td style="height:10px;"></td></tr>
+                        <tr>
+                          <td style="padding:12px 16px;background:#f8fafc;border-left:4px solid #38bdf8;border-radius:4px;">
+                            <span style="font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Phone</span><br/>
+                            <span style="font-size:16px;color:#0f172a;font-weight:600;">${phone}</span>
+                          </td>
+                        </tr>
+                        <tr><td style="height:10px;"></td></tr>
+                        <tr>
+                          <td style="padding:14px 16px;background:#f8fafc;border-left:4px solid #0ea5e9;border-radius:4px;">
+                            <span style="font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Message</span><br/>
+                            <span style="font-size:15px;color:#334155;line-height:1.6;">${comment}</span>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="margin:28px 0 0;font-size:12px;color:#94a3b8;">Submitted at: ${timestamp}</p>
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td style="background:#0f172a;padding:24px 40px;text-align:center;">
+                      <p style="margin:0;color:#38bdf8;font-size:13px;font-weight:600;">AK Webflair Technologies</p>
+                      <p style="margin:4px 0 0;color:#64748b;font-size:12px;">Founder & CEO — Kavin M</p>
+                      <p style="margin:8px 0 0;color:#334155;font-size:11px;">This is an automated admin notification.</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
+      attachments: [
+        {
+          filename: 'logo.jpg',
+          path: logoPath,
+          cid: 'akwlogo',
+        },
+      ],
     };
 
-    // Auto-reply email
+    /* ---------- AUTO-REPLY EMAIL ---------- */
     const autoReplyMail = {
-      from: `"Development Team" <${process.env.EMAIL_USER}>`,
+      from: `"AK Webflair Technologies" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: '✅ Thanks for contacting us!',
+      subject: '✅ Thanks for contacting AK Webflair Technologies!',
       html: `
-        <p>Hi <strong>${name}</strong>,</p>
-        <p>Thanks for reaching out! We have received your message and will get back to you soon.</p>
-        <br/>
-        <p>Regards,<br/>Development Team</p>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Thank You - AK Webflair Technologies</title>
+        </head>
+        <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:'Segoe UI',Arial,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(14,165,233,0.10);">
+
+                  <!-- HEADER -->
+                  <tr>
+                    <td style="background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%);padding:32px 40px;text-align:center;">
+                      <img src="cid:akwlogo" alt="AK Webflair Technologies" style="height:56px;max-width:220px;object-fit:contain;margin-bottom:14px;display:block;margin-left:auto;margin-right:auto;" />
+                      <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;">Thank You for Reaching Out!</h1>
+                      <p style="margin:6px 0 0;color:#bae6fd;font-size:13px;">We've received your message and will be in touch soon.</p>
+                    </td>
+                  </tr>
+
+                  <!-- BODY -->
+                  <tr>
+                    <td style="padding:36px 40px;">
+                      <p style="margin:0 0 16px;color:#0f172a;font-size:16px;">Hi <strong>${name}</strong>,</p>
+                      <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.7;">
+                        Thank you for contacting <strong style="color:#0ea5e9;">AK Webflair Technologies</strong>. We have successfully received your message and our team will review it shortly.
+                      </p>
+                      <p style="margin:0 0 28px;color:#475569;font-size:15px;line-height:1.7;">
+                        We typically respond within <strong>24–48 business hours</strong>. If your query is urgent, feel free to reply directly to this email.
+                      </p>
+
+                      <!-- Divider -->
+                      <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;" />
+
+                      <p style="margin:0;color:#64748b;font-size:13px;line-height:1.6;">
+                        Warm regards,<br/>
+                        <strong style="color:#0f172a;font-size:14px;">Kavin M M</strong><br/>
+                        <span style="color:#0ea5e9;">Founder & CEO, AK Webflair Technologies</span>
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td style="background:#0f172a;padding:24px 40px;text-align:center;">
+                      <p style="margin:0;color:#38bdf8;font-size:13px;font-weight:600;">AK Webflair Technologies</p>
+                      <p style="margin:4px 0 0;color:#64748b;font-size:12px;">Founder & CEO — Kavin M</p>
+                      <p style="margin:10px 0 0;color:#334155;font-size:11px;">You are receiving this because you submitted a contact form on our website.</p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
+      attachments: [
+        {
+          filename: 'logo.jpg',
+          path: logoPath,
+          cid: 'akwlogo',
+        },
+      ],
     };
 
     // Send both emails in parallel (faster!)
@@ -158,7 +307,6 @@ async function processContactInBackground({ name, email, phone, comment }) {
       sendMailWithRetry(transporter, autoReplyMail, 2, 1000),
     ]);
 
-    // Log results
     if (adminResult.status === 'fulfilled' && adminResult.value) {
       console.log('✅ Admin email sent successfully');
     } else {
@@ -171,7 +319,6 @@ async function processContactInBackground({ name, email, phone, comment }) {
       console.error('❌ Auto-reply email failed');
     }
 
-    // Close transporter
     transporter.close();
 
   } catch (err) {
