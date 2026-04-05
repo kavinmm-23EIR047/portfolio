@@ -20,7 +20,7 @@ const services = [
     title: "Web Development",
     description:
       "Scalable business websites, admin dashboards, portfolio sites, and enterprise web platforms.",
-    price: "₹8,999",
+    price: "₹3,999",
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ const services = [
     title: "App Development",
     description:
       "Modern Android, iOS, and cross-platform mobile apps with premium UI and backend integration.",
-    price: "₹14,999",
+    price: "₹4,999",
   },
   {
     id: 3,
@@ -36,7 +36,7 @@ const services = [
     title: "SaaS Solutions",
     description:
       "Cloud-based scalable SaaS platforms for startups, clients, and business automation.",
-    price: "₹24,999",
+    price: "₹14,999",
   },
   {
     id: 4,
@@ -44,7 +44,7 @@ const services = [
     title: "UI / UX Design",
     description:
       "Premium product interfaces, wireframes, design systems, and clickable prototypes.",
-    price: "₹4,999",
+    price: "₹2,999",
   },
   {
     id: 5,
@@ -52,7 +52,7 @@ const services = [
     title: "Media Solutions",
     description:
       "Professional video editing, reels, branding videos, and motion graphics solutions.",
-    price: "₹3,999",
+    price: "₹1,999",
   },
   {
     id: 6,
@@ -60,7 +60,7 @@ const services = [
     title: "Product Development",
     description:
       "Complete end-to-end product engineering from concept to deployment.",
-    price: "₹29,999",
+    price: "₹14,999",
   },
 ];
 
