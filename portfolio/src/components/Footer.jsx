@@ -79,8 +79,8 @@ const Footer = () => {
             {/* BRAND SUMMARY */}
             <div className="lg:col-span-2 pr-0 lg:pr-10">
               <Link to="/" className="flex items-center gap-3 mb-6 group cursor-pointer">
-                <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md p-2 flex items-center justify-center border border-white/25 shadow-md group-hover:scale-105 transition-transform duration-300">
-                  <BrandLogo className="w-full h-full" primaryColor="#FFFFFF" accentColor="#0A4FE0" badgeColor="#FFFFFF" />
+                <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md p-1 flex items-center justify-center border border-white/25 shadow-md group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                  <BrandLogo className="w-full h-full object-cover rounded-xl" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-3xl font-extrabold text-white tracking-tight">
@@ -199,7 +199,7 @@ const Footer = () => {
               <ul className="space-y-3.5 text-sm font-medium text-[#CBD5E1]">
                 <li className="flex items-start gap-3">
                   <FaMapMarkerAlt className="mt-1 text-white flex-shrink-0" size={16} />
-                  <span>Tiruppur, Tamil Nadu, India</span>
+                  <span>Coimbatore & Tiruppur, Tamil Nadu | Chennai, Bangalore & India</span>
                 </li>
                 <li>
                   <a href="mailto:akwebflairtechnologies@gmail.com" className="flex items-center gap-3 hover:text-white transition-colors">

@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 
+Sitemap: https://akwebflairtechnologies.vercel.app/sitemap.xml
 Sitemap: https://akwebflairtechnologies.vercel.app/sitemap_index.xml

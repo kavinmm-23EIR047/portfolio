@@ -30,6 +30,23 @@ import {
 import { FaWhatsapp, FaRobot, FaRocket, FaChartLine, FaBolt, FaMobileAlt, FaPhoneAlt, FaFileAlt } from "react-icons/fa";
 import { getAgentReply } from "../data/companyData";
 
+const AIRobotAvatar = ({ className = "w-5 h-5 text-white" }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <line x1="50" y1="10" x2="50" y2="24" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+    <circle cx="50" cy="8" r="4" fill="#38BDF8" />
+    <rect x="16" y="42" width="8" height="16" rx="4" fill="currentColor" opacity="0.85" />
+    <rect x="76" y="42" width="8" height="16" rx="4" fill="currentColor" opacity="0.85" />
+    <rect x="22" y="22" width="56" height="56" rx="20" fill="currentColor" />
+    <rect x="28" y="34" width="44" height="30" rx="12" fill="#090D1A" />
+    <circle cx="41" cy="49" r="4.5" fill="#38BDF8" />
+    <circle cx="59" cy="49" r="4.5" fill="#38BDF8" />
+    <line x1="36" y1="41" x2="46" y2="41" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" />
+    <line x1="54" y1="41" x2="64" y2="41" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M43 57 Q50 62 57 57" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+    <path d="M38 78 H62 L58 88 H42 Z" fill="currentColor" opacity="0.9" />
+  </svg>
+);
+
 const capabilityOptions = [
   "CRM Platforms & UI Dashboards",
   "Landing & E-Commerce Stores",
@@ -298,14 +315,14 @@ const CompanyChatbot = () => {
             {/* WINDOW HEADER */}
             <header className="bg-gradient-to-r from-[#0639A8] via-[#0A4FE0] to-[#1E6BFF] text-white px-4 py-3.5 flex items-center justify-between flex-shrink-0 shadow-md">
               <div className="flex items-center gap-3">
-                <div className="relative w-9 h-9 rounded-xl bg-white text-[#0A4FE0] flex items-center justify-center shadow-sm">
-                  <Bot size={20} />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#10B981] border-2 border-white" />
+                <div className="relative w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center shadow-sm border border-white/30">
+                  <AIRobotAvatar className="w-6 h-6 text-white" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#10B981] border-2 border-white animate-pulse" />
                 </div>
                 <div>
                   <h3 className="text-sm font-extrabold tracking-tight text-white flex items-center gap-1.5">
                     WebFlair AI Lead Agent
-                    <BrainCircuit size={14} className="text-amber-300" />
+                    <BrainCircuit size={15} className="text-white" />
                   </h3>
                   <p className="text-[10px] font-mono text-[#DBEAFE] font-medium">
                     Online • Mindset Analyzer & WhatsApp Lead Bot
@@ -317,16 +334,16 @@ const CompanyChatbot = () => {
                 <button
                   onClick={handleResetChat}
                   title="Reset Conversation"
-                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-colors cursor-pointer"
                 >
-                  <RefreshCw size={13} />
+                  <RefreshCw size={13} className="text-white" />
                 </button>
                 <button
                   onClick={() => setOpen(false)}
-                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/35 text-white flex items-center justify-center transition-colors cursor-pointer"
                   aria-label="Close Assistant"
                 >
-                  <X size={16} />
+                  <X size={16} className="text-white" />
                 </button>
               </div>
             </header>
@@ -349,8 +366,8 @@ const CompanyChatbot = () => {
                     }`}
                   >
                     {msg.role === "agent" && (
-                      <div className="w-7 h-7 rounded-lg bg-[#0A4FE0] text-white flex items-center justify-center flex-shrink-0 text-xs shadow-xs mt-0.5">
-                        <Bot size={15} />
+                      <div className="w-8 h-8 rounded-xl bg-[#0A4FE0] text-white flex items-center justify-center flex-shrink-0 text-xs shadow-md border border-white/20 mt-0.5">
+                        <AIRobotAvatar className="w-5 h-5 text-white" />
                       </div>
                     )}
 
@@ -393,7 +410,9 @@ const CompanyChatbot = () => {
                               className="w-full text-left px-3 py-2 rounded-xl bg-[#F8FAFC] hover:bg-[#EFF6FF] text-[#0A4FE0] border border-[#CBD5E1] hover:border-[#0A4FE0] text-[11px] font-bold transition-all cursor-pointer flex items-center justify-between"
                             >
                               <span>{cap}</span>
-                              <ArrowRight size={12} />
+                              <span className="w-5 h-5 rounded-full bg-[#0A4FE0] text-white flex items-center justify-center flex-shrink-0">
+                                <ArrowRight size={11} className="text-white" />
+                              </span>
                             </button>
                           ))}
                         </div>
@@ -409,7 +428,9 @@ const CompanyChatbot = () => {
                               className="w-full text-left px-3 py-2 rounded-xl bg-[#F8FAFC] hover:bg-[#EFF6FF] text-[#0A4FE0] border border-[#CBD5E1] hover:border-[#0A4FE0] text-[11px] font-bold transition-all cursor-pointer flex items-center justify-between"
                             >
                               <span>{bud}</span>
-                              <ArrowRight size={12} />
+                              <span className="w-5 h-5 rounded-full bg-[#0A4FE0] text-white flex items-center justify-center flex-shrink-0">
+                                <ArrowRight size={11} className="text-white" />
+                              </span>
                             </button>
                           ))}
                         </div>
@@ -435,8 +456,8 @@ const CompanyChatbot = () => {
               {/* AI THINKING LOADING ANIMATION */}
               {isThinking && (
                 <div className="flex items-center gap-2 text-[#0A4FE0]">
-                  <div className="w-7 h-7 rounded-lg bg-[#0A4FE0] text-white flex items-center justify-center flex-shrink-0 text-xs shadow-xs">
-                    <Bot size={15} />
+                  <div className="w-8 h-8 rounded-xl bg-[#0A4FE0] text-white flex items-center justify-center flex-shrink-0 shadow-md border border-white/20">
+                    <AIRobotAvatar className="w-5 h-5 text-white" />
                   </div>
                   <div className="bg-white border border-[#CBD5E1] px-4 py-2.5 rounded-2xl text-xs font-bold text-[#0A4FE0] flex items-center gap-2 shadow-xs">
                     <Loader2 size={14} className="animate-spin text-[#0A4FE0]" />
@@ -456,9 +477,11 @@ const CompanyChatbot = () => {
                   <button
                     key={idx}
                     onClick={() => handleSend(starter.query)}
-                    className="flex-shrink-0 px-3 py-1.5 rounded-full bg-[#F8FAFC] hover:bg-[#EFF6FF] text-[#0A4FE0] border border-[#E2E8F0] hover:border-[#BFDBFE] text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+                    className="flex-shrink-0 px-3 py-1.5 rounded-full bg-[#F8FAFC] hover:bg-[#EFF6FF] text-[#0A4FE0] border border-[#E2E8F0] hover:border-[#BFDBFE] text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2"
                   >
-                    <SIcon size={12} />
+                    <span className="w-4 h-4 rounded-full bg-[#0A4FE0] text-white flex items-center justify-center flex-shrink-0">
+                      <SIcon size={10} className="text-white" />
+                    </span>
                     <span>{starter.label}</span>
                   </button>
                 );
@@ -508,10 +531,10 @@ const CompanyChatbot = () => {
         aria-label="Open WebFlair AI Assistant"
       >
         <div className="relative flex items-center justify-center">
-          <MessageCircle size={22} className="text-[#25D366]" />
-          <Sparkles size={11} className="absolute -top-1 -right-1 text-amber-300 fill-amber-300 animate-pulse" />
+          <AIRobotAvatar className="w-6 h-6 text-white" />
+          <Sparkles size={12} className="absolute -top-1.5 -right-1.5 text-amber-300 fill-amber-300 animate-pulse" />
         </div>
-        <span className="text-xs sm:text-sm font-extrabold tracking-wide hidden xs:inline">
+        <span className="text-xs sm:text-sm font-extrabold tracking-wide text-white hidden xs:inline">
           {open ? "Close Assistant" : "Ask WebFlair AI"}
         </span>
       </button>

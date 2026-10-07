@@ -203,8 +203,8 @@ const Header = () => {
           
           {/* BRAND LOGO */}
           <Link to="/" className="flex items-center gap-3 cursor-pointer group">
-            <div className="w-11 h-11 md:w-12 md:h-12 rounded-2xl bg-white/15 backdrop-blur-md p-2 flex items-center justify-center border border-white/25 shadow-md group-hover:scale-105 transition-transform duration-300">
-              <BrandLogo className="w-full h-full" primaryColor="#FFFFFF" accentColor="#0A4FE0" badgeColor="#FFFFFF" />
+            <div className="w-11 h-11 md:w-12 md:h-12 rounded-2xl bg-white/15 backdrop-blur-md p-1 flex items-center justify-center border border-white/25 shadow-md group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+              <BrandLogo className="w-full h-full object-cover rounded-xl" />
             </div>
             <div className="flex flex-col">
               <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1">
