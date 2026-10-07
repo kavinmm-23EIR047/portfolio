@@ -1,0 +1,92 @@
+@layer base {
+  :root {
+    /* --- Clean Solid Blue System --- */
+    --brand-blue: #0A4FE0;
+    /* Primary Signature Solid Royal Blue */
+    --brand-blue-deep: #0639A8;
+    /* Deep Solid Cobalt Blue for Dark Cards / Footer */
+    --brand-blue-light: #2563EB;
+    /* Electric Blue for active highlights */
+    --brand-blue-subtle: rgba(10, 79, 224, 0.08);
+    /* Soft blue tint */
+    --brand-blue-glass: rgba(10, 79, 224, 0.15);
+    /* Glass blue overlay */
+
+    /* Backward compatibility mappings */
+    --brand-indigo: #0A4FE0;
+    --brand-indigo-light: #4DA8FF;
+    --brand-orange: #0A4FE0;
+    --brand-orange-hover: #0639A8;
+    --brand-dark-green: #CBD5E1;
+    --brand-purple-muted: rgba(10, 79, 224, 0.8);
+
+    /* --- Clean Silver Gray System --- */
+    --silver-50: #F8FAFC;
+    /* Clean Silver White */
+    --silver-100: #F1F5F9;
+    /* Soft Silver Canvas */
+    --silver-200: #E2E8F0;
+    /* Light Metallic Silver Border */
+    --silver-300: #CBD5E1;
+    /* Polished Silver Mist Accent */
+    --silver-400: #94A3B8;
+    /* Medium Silver Slate */
+    --silver-500: #64748B;
+    /* Silver Slate Muted Body Text */
+    --silver-600: #475569;
+    /* Dark Silver Slate */
+
+    /* --- Surfaces --- */
+    --bg-light: #F1F5F9;
+    /* Crisp Silver Canvas */
+    --bg-white: #ffffff;
+    /* Pure White for Elevated Cards */
+    --bg-translucent: rgba(255, 255, 255, 0.85);
+
+    /* --- Typography --- */
+    --text-dark: #0F172A;
+    /* High-contrast Slate Dark for Headings */
+    --text-muted: #64748B;
+    /* Silver Slate Body Text */
+    --text-light: #FFFFFF;
+    /* Pure White Text on Solid Blue */
+    --text-light-muted: #CBD5E1;
+    /* Silver Gray Secondary Text on Blue */
+
+    /* --- Borders & Radii --- */
+    --border-light: #E2E8F0;
+    /* Crisp Silver Border */
+    --border-translucent: rgba(255, 255, 255, 0.2);
+
+    --radius-pill: 9999px;
+    /* WhatsApp-style Pill capsules */
+    --radius-card: 2rem;
+    /* 32px - Soft Rounded Section Cards */
+    --radius-xl: 2.5rem;
+    /* 40px - Grand Rounded Blocks */
+    --radius-ui: 1rem;
+    /* 16px - Standard UI Elements */
+
+    /* --- Shadows --- */
+    --shadow-soft: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+    --shadow-glow: 0 12px 35px -5px rgba(10, 79, 224, 0.35);
+    --shadow-orange: 0 10px 30px -5px rgba(10, 79, 224, 0.35);
+    --shadow-silver: 0 10px 30px -5px rgba(148, 163, 184, 0.2);
+  }
+
+  body {
+    background-color: var(--bg-light) !important;
+    color: var(--text-dark);
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.025em;
+  }
+}

@@ -9,8 +9,17 @@ import nodemailer from 'nodemailer';
 import feedbackRoutes from './feedbackRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import connectDB from './config/db.js';
+import dataRoutes from './routes/dataRoutes.js';
 
 dotenv.config();
+
+// Connect to MongoDB
+if (process.env.MONGODB_URI) {
+  connectDB();
+} else {
+  console.warn('⚠️ MONGODB_URI is not defined. Database will not be connected.');
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -327,10 +336,16 @@ async function processContactInBackground({ name, email, phone, comment }) {
   }
 }
 
+import leadRoutes from './routes/leadRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+
 /* ================================
-   FEEDBACK ROUTE
+   FEEDBACK & ADMIN ROUTE
 ================================ */
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/leads', leadRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', dataRoutes);
 
 /* ================================
    TIMEOUT & 404

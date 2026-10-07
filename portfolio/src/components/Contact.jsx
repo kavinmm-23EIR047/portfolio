@@ -1,267 +1,231 @@
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
-import { useState, useEffect, useRef } from "react";
-import * as THREE from "three";
-
-const ThreeScene = () => {
-  const mountRef = useRef(null);
-
-  useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return;
-
-    const width = mount.clientWidth;
-    const height = mount.clientHeight;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    mount.appendChild(renderer.domElement);
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
-    camera.position.set(0, 0, 4);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const pl1 = new THREE.PointLight(0x38bdf8, 3, 20);
-    pl1.position.set(3, 3, 3);
-    scene.add(pl1);
-    const pl2 = new THREE.PointLight(0x818cf8, 3, 20);
-    pl2.position.set(-3, -2, 2);
-    scene.add(pl2);
-
-    const torusKnot = new THREE.Mesh(
-      new THREE.TorusKnotGeometry(0.6, 0.18, 128, 32),
-      new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.7, roughness: 0.15 })
-    );
-    scene.add(torusKnot);
-
-    const spheres = Array.from({ length: 5 }, (_, i) => {
-      const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.07, 16, 16),
-        new THREE.MeshStandardMaterial({
-          color: i % 2 === 0 ? 0x818cf8 : 0x38bdf8,
-          metalness: 0.7,
-          roughness: 0.2,
-        })
-      );
-      scene.add(mesh);
-      return { mesh, angle: (i / 5) * Math.PI * 2, radius: 1.4, speed: 0.5 + i * 0.06 };
-    });
-
-    const pos = new Float32Array(300 * 3).map(() => (Math.random() - 0.5) * 20);
-    const particleGeo = new THREE.BufferGeometry();
-    particleGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    const particles = new THREE.Points(
-      particleGeo,
-      new THREE.PointsMaterial({ color: 0xffffff, size: 0.04, transparent: true, opacity: 0.4 })
-    );
-    scene.add(particles);
-
-    let mouseX = 0, mouseY = 0;
-    const onMouseMove = (e) => {
-      const r = mount.getBoundingClientRect();
-      mouseX = ((e.clientX - r.left) / r.width - 0.5) * 2;
-      mouseY = -((e.clientY - r.top) / r.height - 0.5) * 2;
-    };
-    mount.addEventListener("mousemove", onMouseMove);
-
-    let animId;
-    const clock = new THREE.Clock();
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-      torusKnot.rotation.x = t * 0.3 + mouseY * 0.4;
-      torusKnot.rotation.y = t * 0.5 + mouseX * 0.4;
-      spheres.forEach((s) => {
-        s.angle += s.speed * 0.01;
-        s.mesh.position.set(
-          Math.cos(s.angle) * s.radius,
-          Math.sin(s.angle * 0.7) * (s.radius * 0.4),
-          Math.sin(s.angle) * (s.radius * 0.4)
-        );
-      });
-      particles.rotation.y = t * 0.015;
-      camera.position.x += (mouseX * 0.3 - camera.position.x) * 0.05;
-      camera.position.y += (mouseY * 0.2 - camera.position.y) * 0.05;
-      camera.lookAt(0, 0, 0);
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    const onResize = () => {
-      const w = mount.clientWidth, h = mount.clientHeight;
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    };
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      cancelAnimationFrame(animId);
-      mount.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("resize", onResize);
-      if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
-      renderer.dispose();
-    };
-  }, []);
-
-  return <div ref={mountRef} className="absolute inset-0 cursor-crosshair" />;
-};
+import { useState } from "react";
+import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaPaperPlane, FaWhatsapp } from "react-icons/fa";
 
 const Contact = () => {
   const { register, handleSubmit, reset } = useForm();
   const [status, setStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     setStatus(null);
-    const [response] = await Promise.all([
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }).catch(() => null),
-      sleep(1800),
-    ]);
-    try {
-      if (!response) throw new Error();
-      const result = await response.json();
-      if (response.ok && result.success) {
-        setStatus({ type: "success", message: "Message sent successfully" });
-        reset();
-      } else {
-        setStatus({ type: "error", message: "Failed to send message" });
-      }
-    } catch {
-      setStatus({ type: "error", message: "Something went wrong" });
-    } finally {
-      setIsSubmitting(false);
-    }
+
+    // Format pre-filled WhatsApp enquiry message
+    const formattedMessage =
+      `*New Project Enquiry — AK WebFlair Technologies*\n\n` +
+      `*Name:* ${data.name || "Client"}\n` +
+      `*Email:* ${data.email || "N/A"}\n` +
+      `*Phone:* ${data.phone || "N/A"}\n` +
+      `*Project Scope:* ${data.comment || "Interested in custom software development."}\n\n` +
+      `*Sent via WebFlair Direct Portal*`;
+
+    const encodedText = encodeURIComponent(formattedMessage);
+    const whatsappUrl = `https://wa.me/919600732162?text=${encodedText}`;
+
+    // Background sync to backend leads database
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/leads`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        comment: data.comment,
+        service: "Direct Contact Portal",
+        source: "Website Contact Form",
+        mindsetIntent: "High Intent (Contact Form Submission)",
+        suggestedStack: "React, Node.js, PostgreSQL",
+      }),
+    }).catch(() => null);
+
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).catch(() => null);
+
+    // Instant direct WhatsApp launch
+    window.open(whatsappUrl, "_blank");
+
+    setStatus({
+      type: "success",
+      message: "Opening WhatsApp... Your project details are pre-filled! Just click send in WhatsApp.",
+    });
+
+    setIsSubmitting(false);
+    reset();
   };
 
   return (
-    <section id="contact" className="py-20 px-5 bg-transparent">
+    <section id="contact" className="py-24 sm:py-32 px-5 md:px-10 lg:px-16 bg-[#F1F5F9] relative overflow-hidden select-none">
+      {/* Decorative Aura */}
+      <div className="absolute top-0 right-1/3 w-[600px] h-[600px] bg-[#0A4FE0]/5 rounded-full blur-[130px] pointer-events-none" />
 
-      {/* Heading */}
-      <div className="text-center mb-10">
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
-          Contact{" "}
-          <span className="bg-gradient-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">
-            Us
-          </span>
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-3">
-          Let's build scalable digital products together.
-        </p>
-      </div>
-
-      <div className="max-w-3xl mx-auto space-y-4">
-
-        {/* TOP — Compact Three.js Banner */}
-        <div className="relative rounded-2xl overflow-hidden h-[160px] border border-white/10">
-          <div className="absolute inset-0 bg-gradient-to-r from-sky-950 via-indigo-950 to-slate-900" />
-          <ThreeScene />
-          <div className="absolute inset-0 z-10 flex items-center justify-between px-8 pointer-events-none">
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.7 }}
-            >
-              <h3 className="text-lg font-semibold text-white leading-tight">
-                Build Something Amazing 🚀
-              </h3>
-              <p className="text-xs text-white/60 mt-1">
-                Move your cursor · interact with the scene
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm"
-            >
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-white/80 text-xs font-mono">Available for projects</span>
-            </motion.div>
+      <div className="max-w-5xl mx-auto relative z-10">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-white text-[#0A4FE0] text-xs font-extrabold px-5 py-2 rounded-full tracking-widest mb-6 uppercase shadow-sm border border-[#CBD5E1]">
+            <span className="w-2 h-2 rounded-full bg-[#0A4FE0]" />
+            Direct WhatsApp Enquiry
           </div>
+
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
+            Start Your Project with <span className="text-[#0A4FE0]">WebFlair</span>
+          </h2>
+
+          <p className="mt-4 text-[#64748B] text-lg font-medium max-w-2xl mx-auto">
+            Fill out your project details below to automatically open WhatsApp and chat directly with Founder Kavin M M.
+          </p>
         </div>
 
-        {/* BOTTOM — Full Width Form */}
+        {/* Dual-Tone Contact Card */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="rounded-2xl overflow-hidden border border-white/10 dark:border-gray-700 shadow-2xl"
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_-15px_rgba(15,23,42,0.12)] border border-[#CBD5E1] overflow-hidden flex flex-col md:flex-row"
         >
-          {/* Terminal top bar */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/60 dark:bg-black/60 backdrop-blur-md">
-            <span className="w-3 h-3 bg-red-500 rounded-full" />
-            <span className="w-3 h-3 bg-yellow-400 rounded-full" />
-            <span className="w-3 h-3 bg-green-500 rounded-full" />
-            <span className="ml-3 text-xs text-gray-400 font-mono">contact.sh</span>
+          {/* LEFT: Solid Royal Blue Info Panel */}
+          <div className="bg-[#0A4FE0] p-8 sm:p-10 md:w-5/12 flex flex-col justify-between text-white relative overflow-hidden">
+            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="relative z-10">
+              <span className="text-xs uppercase font-extrabold tracking-widest text-[#CBD5E1] mb-2 block">
+                Direct Communication
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold mb-4 tracking-tight">
+                Contact Details
+              </h3>
+              <p className="text-[#CBD5E1] text-sm font-medium leading-relaxed mb-8">
+                Reach out directly via WhatsApp or phone. We provide immediate technical analysis and scope planning.
+              </p>
+
+              <div className="space-y-5 text-sm font-medium">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-white flex-shrink-0 border border-white/20 shadow-sm">
+                    <FaMapMarkerAlt size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#CBD5E1]">Office Location</p>
+                    <p className="font-bold text-white text-sm mt-0.5">Tiruppur, Tamil Nadu, India</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-white flex-shrink-0 border border-white/20 shadow-sm">
+                    <FaPhoneAlt size={14} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#CBD5E1]">Direct Phone Lines</p>
+                    <a href="tel:+919600732162" className="font-bold text-white hover:underline text-sm mt-0.5 block">
+                      +91 96007 32162
+                    </a>
+                    <a href="tel:+919363265477" className="font-bold text-white hover:underline text-sm mt-0.5 block">
+                      +91 93632 65477
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-white flex-shrink-0 border border-white/20 shadow-sm">
+                    <FaEnvelope size={15} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#CBD5E1]">Official Email</p>
+                    <a
+                      href="mailto:akwebflairtechnologies@gmail.com"
+                      className="font-bold text-white hover:underline text-sm mt-0.5 block break-all"
+                    >
+                      akwebflairtechnologies@gmail.com
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* WhatsApp Quick Link */}
+            <div className="mt-8 pt-6 border-t border-white/20 relative z-10">
+              <a
+                href="https://wa.me/919600732162?text=Hi%20AK%20WebFlair%20Technologies%2C%20I%20want%20to%20enquire%20about%20a%20project."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2.5 w-full py-3.5 px-6 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold text-sm transition-all duration-200 shadow-md hover:scale-105 cursor-pointer"
+              >
+                <FaWhatsapp size={20} /> Open Direct WhatsApp
+              </a>
+            </div>
           </div>
 
-          {/* Form */}
-          <div className="p-6 backdrop-blur-xl bg-white/70 text-gray-900 dark:bg-black/70 dark:text-green-400 font-mono text-sm">
+          {/* RIGHT: Direct WhatsApp Form */}
+          <div className="p-8 sm:p-10 md:w-7/12 flex flex-col justify-center">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
               <div className="grid sm:grid-cols-2 gap-4">
-                {["name", "email"].map((field) => (
+                <div>
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                    Your Name *
+                  </label>
                   <input
-                    key={field}
-                    {...register(field, { required: true })}
-                    placeholder={`> Enter ${field}`}
-                    className="w-full p-3 rounded-lg bg-transparent border border-gray-300 dark:border-gray-600 focus:border-sky-500 outline-none"
+                    {...register("name", { required: true })}
+                    placeholder="e.g. John Doe"
+                    className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-2xl px-4 py-3 text-sm text-[#0F172A] font-medium placeholder-[#94A3B8] focus:outline-none focus:border-[#0A4FE0] transition"
                   />
-                ))}
+                </div>
+                <div>
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                    Email Address
+                  </label>
+                  <input
+                    {...register("email")}
+                    type="email"
+                    placeholder="john@example.com"
+                    className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-2xl px-4 py-3 text-sm text-[#0F172A] font-medium placeholder-[#94A3B8] focus:outline-none focus:border-[#0A4FE0] transition"
+                  />
+                </div>
               </div>
 
-              <input
-                {...register("phone", { required: true })}
-                placeholder="> Enter phone"
-                className="w-full p-3 rounded-lg bg-transparent border border-gray-300 dark:border-gray-600 focus:border-sky-500 outline-none"
-              />
+              <div>
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                  Phone Number *
+                </label>
+                <input
+                  {...register("phone", { required: true })}
+                  placeholder="+91 96007 32162"
+                  className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-2xl px-4 py-3 text-sm text-[#0F172A] font-medium placeholder-[#94A3B8] focus:outline-none focus:border-[#0A4FE0] transition"
+                />
+              </div>
 
-              <textarea
-                {...register("comment", { required: true })}
-                placeholder="> Type your message..."
-                className="w-full p-3 h-32 rounded-lg bg-transparent border border-gray-300 dark:border-gray-600 focus:border-sky-500 outline-none resize-none"
-              />
+              <div>
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                  Project Scope & Details *
+                </label>
+                <textarea
+                  {...register("comment", { required: true })}
+                  rows={4}
+                  placeholder="Describe your CRM, E-Commerce, AI Agent, or Mobile App requirements..."
+                  className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-2xl px-4 py-3 text-sm text-[#0F172A] font-medium placeholder-[#94A3B8] resize-none focus:outline-none focus:border-[#0A4FE0] transition"
+                />
+              </div>
 
               {status && (
-                <p className={`text-xs ${status.type === "success" ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}>
-                  {">"} {status.message}
-                </p>
+                <div className="p-4 rounded-2xl text-xs font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">
+                  {status.message}
+                </div>
               )}
 
-              <motion.button
+              <button
                 type="submit"
-                whileTap={{ scale: 0.97 }}
                 disabled={isSubmitting}
-                className="w-full py-3 rounded-lg bg-sky-500 hover:bg-sky-600 text-white flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transition-colors font-sans font-medium"
+                className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold py-4 px-8 rounded-full transition-all duration-300 shadow-md hover:scale-[1.02] flex justify-center items-center gap-2.5 text-sm cursor-pointer"
               >
-                {isSubmitting ? (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                    />
-                    Deploying...
-                  </>
-                ) : (
-                  "Send Message"
-                )}
-              </motion.button>
-
+                <FaWhatsapp size={18} />
+                <span>Send Enquiry to WhatsApp</span>
+              </button>
             </form>
           </div>
         </motion.div>
-
       </div>
     </section>
   );

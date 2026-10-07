@@ -1,0 +1,66 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer A-Shape Architectural Frame -->
+  <path
+    d="M 100 12 L 185 95 L 152 192 L 130 192 L 130 134 L 70 134 L 70 192 L 48 192 L 15 95 Z"
+    fill="#E2E8F0"
+  />
+
+  <!-- Top Triangle Cutout -->
+  <path
+    d="M 100 38 L 134 78 L 66 78 Z"
+    fill="#0A4FE0"
+  />
+
+  <!-- Center Horizontal Stadium / Pill Capsule -->
+  <rect
+    x="25"
+    y="85"
+    width="150"
+    height="42"
+    rx="21"
+    fill="#0A4FE0"
+  />
+
+  <!-- Center Circular Medallion -->
+  <circle
+    cx="100"
+    cy="106"
+    r="17"
+    fill="#E2E8F0"
+  />
+
+  <!-- 4 Tech Geometry Glyphs inside Center Badge -->
+  <!-- Top-Left: Triangle -->
+  <polygon
+    points="93.5,97 97.5,103.5 89.5,103.5"
+    fill="#0A4FE0"
+  />
+
+  <!-- Top-Right: Rectangle -->
+  <rect
+    x="102"
+    y="97"
+    width="7"
+    height="6.5"
+    rx="0.75"
+    fill="#0A4FE0"
+  />
+
+  <!-- Bottom-Left: Circle -->
+  <circle
+    cx="93.5"
+    cy="111"
+    r="3.5"
+    fill="#0A4FE0"
+  />
+
+  <!-- Bottom-Right: Square -->
+  <rect
+    x="102"
+    y="107.5"
+    width="7"
+    height="7"
+    rx="0.75"
+    fill="#0A4FE0"
+  />
+</svg>

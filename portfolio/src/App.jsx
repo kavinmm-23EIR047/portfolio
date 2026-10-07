@@ -1,98 +1,60 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import "./index.css";
 
 import Header from "./components/Header";
-import Hero from "./components/Hero";
-import About from "./components/About";
-import Services from "./components/Services";
-import MySkills from "./components/MySkills";
-import Portfolio from "./components/Portfolio";
-import Reviews from "./components/Reviews";
-import Contact from "./components/Contact";
 import Footer from "./components/Footer";
-import DevLoader from "./components/DevLoader";
-import DevBackground from "./components/DevBackground";
+import CompanyChatbot from "./components/CompanyChatbot";
 
-import { motion } from "framer-motion";
+// Pages
+import Home from "./pages/Home";
+import AboutPage from "./pages/AboutPage";
+import ProductsPage from "./pages/ProductsPage";
+import SupportPage from "./pages/SupportPage";
+import ServicesPage from "./pages/ServicesPage";
+import AdminDashboard from "./pages/AdminDashboard";
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 60 },
-  visible: { opacity: 1, y: 0 },
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathname]);
+  return null;
 };
 
-const fadeScale = {
-  hidden: { opacity: 0, scale: 0.96 },
-  visible: { opacity: 1, scale: 1 },
+const AppContent = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname === "/admin";
+
+  return (
+    <div className="relative min-h-screen overflow-x-hidden font-sans flex flex-col bg-[#F1F5F9]">
+      <div className="relative z-10 flex-1 flex flex-col">
+        {!isAdminRoute && <Header />}
+
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Routes>
+        </main>
+
+        {!isAdminRoute && <Footer />}
+        {!isAdminRoute && <CompanyChatbot />}
+      </div>
+    </div>
+  );
 };
 
 const App = () => {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-
-    if (savedTheme) {
-      document.documentElement.classList.toggle(
-        "dark",
-        savedTheme === "dark"
-      );
-    } else {
-      const systemDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-
-      document.documentElement.classList.toggle("dark", systemDark);
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 4000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) return <DevLoader />;
-
   return (
-    <div className="relative min-h-screen overflow-x-hidden text-gray-900 dark:text-white">
-
-      {/* 🔥 NEW BACKGROUND */}
-      <DevBackground />
-
-      {/* CONTENT */}
-      <div className="relative z-10">
-        <Header />
-
-        <section id="hero">
-          <Hero />
-        </section>
-
-        <motion.section id="about" variants={sectionVariants} initial="hidden" whileInView="visible" transition={{ duration: 0.8 }} viewport={{ once: true }}>
-          <About />
-        </motion.section>
-
-        <motion.section id="services" variants={sectionVariants} initial="hidden" whileInView="visible" transition={{ duration: 0.8 }} viewport={{ once: true }}>
-          <Services />
-        </motion.section>
-
-        <motion.section id="skills" variants={sectionVariants} initial="hidden" whileInView="visible" transition={{ duration: 0.8 }} viewport={{ once: true }}>
-          <MySkills />
-        </motion.section>
-
-        <motion.section id="portfolio" variants={fadeScale} initial="hidden" whileInView="visible" transition={{ duration: 0.8 }} viewport={{ once: true }}>
-          <Portfolio />
-        </motion.section>
-
-        <motion.section id="reviews" variants={fadeScale} initial="hidden" whileInView="visible" transition={{ duration: 0.8 }} viewport={{ once: true }}>
-          <Reviews />
-        </motion.section>
-
-        <motion.section id="contact" initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}>
-          <Contact />
-        </motion.section>
-
-        <Footer />
-      </div>
-    </div>
+    <BrowserRouter>
+      <ScrollToTop />
+      <AppContent />
+    </BrowserRouter>
   );
 };
 

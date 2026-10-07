@@ -1,0 +1,44 @@
+[
+  {
+    "category": "E-Commerce & FoodTech",
+    "title": "TN Mock Meat — Direct-to-Consumer FoodTech Platform",
+    "description": "Modern e-commerce platform for plant-based mock meat products featuring seamless checkout, catalog browsing, cart management, and payment gateway integration.",
+    "img": "https://res.cloudinary.com/l1gckxwy/image/upload/v1791210409/b03c4b53-64e2-4fd7-b3ae-93b462f6a5f4.png",
+    "website": "https://www.buy.tnmockmeat.com/"
+  },
+  {
+    "category": "E-Commerce & Confectionery",
+    "title": "The Chocolate Mine — Artisanal Confectionery Store",
+    "description": "Premium handcrafted chocolate e-commerce storefront with interactive product showcases, gift box customization, and secure payment processing.",
+    "img": "https://res.cloudinary.com/l1gckxwy/image/upload/v1791209873/d83ede7d-1689-47d5-8e37-711164643965.png",
+    "website": "https://thechocolatemine.in/"
+  },
+  {
+    "category": "Travel & Tour Booking",
+    "title": "Memories Platform Holidays — Tour & Travel Booking Engine",
+    "description": "All-in-one vacation and holiday booking application with dynamic itinerary explorers, custom tour inquiries, and instant booking workflows.",
+    "img": "https://res.cloudinary.com/l1gckxwy/image/upload/v1791210677/d4568d8c-53d3-4a26-abbd-d581fa50bcd5.png",
+    "website": "https://memories-platform-holidays.vercel.app/"
+  },
+  {
+    "category": "Media & Creative Portfolio",
+    "title": "Crazy Capture Studio — Photography & Media Production Portal",
+    "description": "High-impact creative portfolio and booking system for professional photography, cinematography sessions, event bookings, and client galleries.",
+    "img": "https://res.cloudinary.com/l1gckxwy/image/upload/v1791211015/38b188ae-5302-4d44-8187-d6a3aca89285.png",
+    "website": "https://crazy-capture-studio.vercel.app/"
+  },
+  {
+    "category": "Fashion & Apparel E-Commerce",
+    "title": "HM Brand — Modern Apparel & Lifestyle E-Commerce",
+    "description": "Sleek fashion and lifestyle apparel shopping destination featuring dynamic lookbooks, collection filters, responsive size guides, and frictionless checkout.",
+    "img": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
+    "website": "https://hmbrand.com"
+  },
+  {
+    "category": "CleanTech & Solar Energy",
+    "title": "SunLoop Energy — Renewable Energy & Solar Solutions Platform",
+    "description": "Modern sustainable energy platform featuring solar savings calculators, commercial installation workflows, customer portals, and real-time power analytics.",
+    "img": "https://res.cloudinary.com/l1gckxwy/image/upload/v1791211860/23e174d6-52d7-4193-85b0-4736ef895dde.png",
+    "website": "https://www.sunloopenergy.com/"
+  }
+]
