@@ -807,10 +807,23 @@ const AdminDashboard = () => {
                         {item.ownerReply}
                       </div>
                     )}
+                  </div>
+
+                  <div className="pt-3 border-t border-[#F1F5F9] flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
+                    <span className="truncate max-w-[60%]">{item.badge || "Google Review"}</span>
+                    <span>{item.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* TAB 5: SERVER HEALTH & TELEGRAM ALERTS */}
         {activeTab === "health" && (
           <div className="space-y-6">
             {/* TELEGRAM STATUS & ACTION BANNER */}
+
             <div className="bg-gradient-to-r from-[#0639A8] via-[#0A4FE0] to-[#2563EB] text-white p-6 rounded-3xl shadow-lg border border-white/10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
               <div className="flex items-center gap-4 relative z-10">
                 <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-inner">
