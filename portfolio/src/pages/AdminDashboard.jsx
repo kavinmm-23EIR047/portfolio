@@ -20,8 +20,18 @@ import {
   CheckCircle2,
   Clock,
   Filter,
+  Activity,
+  Server,
+  RefreshCw,
+  Send,
+  AlertTriangle,
+  AlertOctagon,
+  Terminal,
+  Radio,
+  ShieldAlert,
+  Zap,
 } from "lucide-react";
-import { FaWhatsapp as FaWhatsappIcon } from "react-icons/fa";
+import { FaWhatsapp as FaWhatsappIcon, FaTelegramPlane } from "react-icons/fa";
 
 const DEFAULT_EMAIL = "akwebflairtechnologies@gmail.com";
 const DEFAULT_PASS = "Kavin20#";
@@ -37,7 +47,7 @@ const AdminDashboard = () => {
   const [isLoadingAuth, setIsLoadingAuth] = useState(false);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState("leads"); // leads, projects, partners, feedback
+  const [activeTab, setActiveTab] = useState("leads"); // leads, projects, partners, feedback, health
 
   // Data states
   const [leads, setLeads] = useState([]);
@@ -46,6 +56,23 @@ const AdminDashboard = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // Health Monitoring & Logs State
+  const [services, setServices] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [logProjectFilter, setLogProjectFilter] = useState("ALL");
+  const [logLevelFilter, setLogLevelFilter] = useState("ALL");
+  const [logSearchQuery, setLogSearchQuery] = useState("");
+  const [isPingingId, setIsPingingId] = useState(null);
+  const [isPingingAll, setIsPingingAll] = useState(false);
+  const [isTestingTelegram, setIsTestingTelegram] = useState(false);
+  const [telegramStatusMsg, setTelegramStatusMsg] = useState(null);
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [serviceForm, setServiceForm] = useState({
+    name: "",
+    url: "",
+    healthPath: "/",
+  });
 
   // Project Form State
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -66,6 +93,7 @@ const AdminDashboard = () => {
   });
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+
 
   // Login handler
   const handleLogin = async (e) => {
@@ -143,13 +171,133 @@ const AdminDashboard = () => {
         setFeedbacks(Array.isArray(dataReviews.reviews) ? dataReviews.reviews : []);
       }
     } catch (err) {}
+
+    try {
+      // Fetch Monitored Services
+      const resServices = await fetch(`${backendUrl}/api/monitor/services`);
+      if (resServices.ok) {
+        const dataServices = await resServices.json();
+        setServices(Array.isArray(dataServices.services) ? dataServices.services : []);
+      }
+    } catch (err) {}
+
+    try {
+      // Fetch System Logs
+      const resLogs = await fetch(`${backendUrl}/api/logs`);
+      if (resLogs.ok) {
+        const dataLogs = await resLogs.json();
+        setLogs(Array.isArray(dataLogs.logs) ? dataLogs.logs : []);
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchData();
+      const interval = setInterval(fetchData, 20000); // Auto-refresh data every 20s
+      return () => clearInterval(interval);
     }
   }, [isAuthenticated]);
+
+  // Ping single service
+  const handlePingService = async (serviceId) => {
+    setIsPingingId(serviceId);
+    try {
+      const res = await fetch(`${backendUrl}/api/monitor/ping/${serviceId}`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        await fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsPingingId(null);
+    }
+  };
+
+  // Ping all services
+  const handlePingAll = async () => {
+    setIsPingingAll(true);
+    try {
+      const res = await fetch(`${backendUrl}/api/monitor/ping-all`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        await fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsPingingAll(false);
+    }
+  };
+
+  // Test Telegram Bot Alert
+  const handleTestTelegram = async () => {
+    setIsTestingTelegram(true);
+    setTelegramStatusMsg(null);
+    try {
+      const res = await fetch(`${backendUrl}/api/monitor/test-telegram`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTelegramStatusMsg({ type: "success", text: "✅ Test alert delivered to your Telegram!" });
+      } else {
+        setTelegramStatusMsg({ type: "error", text: data.message || "Failed to deliver alert." });
+      }
+    } catch (err) {
+      setTelegramStatusMsg({ type: "error", text: "Could not connect to backend server." });
+    } finally {
+      setIsTestingTelegram(false);
+      setTimeout(() => setTelegramStatusMsg(null), 6000);
+    }
+  };
+
+  // Add Service to monitor
+  const handleSaveService = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${backendUrl}/api/monitor/services`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(serviceForm),
+      });
+      if (res.ok) {
+        setShowServiceModal(false);
+        setServiceForm({ name: "", url: "", healthPath: "/" });
+        await fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Delete Monitored Service
+  const handleDeleteService = async (serviceId) => {
+    if (!window.confirm("Remove this project from monitoring?")) return;
+    try {
+      await fetch(`${backendUrl}/api/monitor/services/${serviceId}`, {
+        method: "DELETE",
+      });
+      setServices((prev) => prev.filter((s) => s._id !== serviceId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Clear Logs
+  const handleClearLogs = async () => {
+    if (!window.confirm("Are you sure you want to clear all system logs?")) return;
+    try {
+      await fetch(`${backendUrl}/api/logs/clear`, { method: "DELETE" });
+      setLogs([]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   // Update Lead Status
   const handleUpdateLeadStatus = async (leadId, newStatus) => {
@@ -380,6 +528,7 @@ const AdminDashboard = () => {
             { id: "leads", label: `Client Leads (${leads.length})`, icon: BrainCircuit },
             { id: "projects", label: `Projects (${projects.length})`, icon: Layers },
             { id: "partners", label: `Partners (${partners.length})`, icon: Building2 },
+            { id: "health", label: `Server Health & Telegram (${services.length})`, icon: Activity },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -399,6 +548,7 @@ const AdminDashboard = () => {
             );
           })}
         </div>
+
 
         {/* TAB 1: LEADS MANAGEMENT */}
         {activeTab === "leads" && (
@@ -657,18 +807,347 @@ const AdminDashboard = () => {
                         {item.ownerReply}
                       </div>
                     )}
-                  </div>
-
-                  <div className="pt-3 border-t border-[#F1F5F9] flex items-center justify-between text-[11px] font-mono text-[#94A3B8]">
-                    <span className="truncate max-w-[60%]">{item.badge || "Google Review"}</span>
-                    <span>{item.date}</span>
-                  </div>
+        {/* TAB 5: SERVER HEALTH & TELEGRAM ALERTS */}
+        {activeTab === "health" && (
+          <div className="space-y-6">
+            {/* TELEGRAM STATUS & ACTION BANNER */}
+            <div className="bg-gradient-to-r from-[#0639A8] via-[#0A4FE0] to-[#2563EB] text-white p-6 rounded-3xl shadow-lg border border-white/10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-inner">
+                  <FaTelegramPlane size={30} />
                 </div>
-              ))}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-black tracking-tight">Telegram Alert Bot Active</h3>
+                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      LIVE DISPATCH
+                    </span>
+                  </div>
+                  <p className="text-xs text-blue-100 mt-1 font-medium">
+                    Monitoring Render free tier cold-starts, downtime (500/502/503), and email quota/limits.
+                  </p>
+                  <p className="text-[11px] font-mono text-blue-200/80 mt-1">
+                    Connected Chat ID: <span className="font-bold text-white">6739761210</span> (Kavin M M)
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 relative z-10">
+                <button
+                  onClick={handleTestTelegram}
+                  disabled={isTestingTelegram}
+                  className="flex items-center gap-2 bg-white text-[#0A4FE0] hover:bg-blue-50 font-extrabold px-4 py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer disabled:opacity-50"
+                >
+                  <Send size={14} className={isTestingTelegram ? "animate-spin" : ""} />
+                  <span>{isTestingTelegram ? "Sending Alert..." : "Send Test Telegram Alert"}</span>
+                </button>
+
+                <button
+                  onClick={handlePingAll}
+                  disabled={isPingingAll}
+                  className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs transition-all border border-white/20 cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw size={14} className={isPingingAll ? "animate-spin" : ""} />
+                  <span>{isPingingAll ? "Pinging All..." : "Ping All Servers Now"}</span>
+                </button>
+
+                <button
+                  onClick={() => setShowServiceModal(true)}
+                  className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Add URL</span>
+                </button>
+              </div>
+
+              {/* Status Toast */}
+              {telegramStatusMsg && (
+                <div
+                  className={`absolute bottom-2 left-6 right-6 p-2.5 rounded-xl text-xs font-bold text-center z-20 ${
+                    telegramStatusMsg.type === "success"
+                      ? "bg-emerald-500/90 text-white"
+                      : "bg-rose-500/90 text-white"
+                  }`}
+                >
+                  {telegramStatusMsg.text}
+                </div>
+              )}
+            </div>
+
+            {/* MONITORED DEPLOYED BACKENDS GRID */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h4 className="text-base font-extrabold text-[#0F172A]">Monitored Deployed Backends ({services.length})</h4>
+                  <p className="text-xs text-[#64748B]">Auto-ping keeps Render free tiers awake & detects downtime</p>
+                </div>
+                <span className="text-xs font-bold text-[#64748B] bg-white px-3 py-1.5 rounded-xl border border-[#CBD5E1]">
+                  Interval: Every 10 Mins
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {services.map((svc) => {
+                  const isOnline = svc.lastStatus === "online";
+                  const isColdBoot = svc.lastStatus === "cold_boot";
+                  const isOffline = svc.lastStatus === "offline";
+
+                  return (
+                    <div
+                      key={svc._id || svc.name}
+                      className="bg-white rounded-3xl p-6 border border-[#CBD5E1] shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="text-[10px] font-bold uppercase text-[#64748B] tracking-wider">
+                              Backend Service
+                            </span>
+                            <h5 className="text-base font-extrabold text-[#0F172A] leading-snug">{svc.name}</h5>
+                          </div>
+                          <span
+                            className={`px-3 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 ${
+                              isOnline
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : isColdBoot
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : isOffline
+                                ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                : "bg-slate-100 text-slate-700 border border-slate-200"
+                            }`}
+                          >
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                isOnline
+                                  ? "bg-emerald-500"
+                                  : isColdBoot
+                                  ? "bg-amber-500"
+                                  : isOffline
+                                  ? "bg-rose-500 animate-ping"
+                                  : "bg-slate-400"
+                              }`}
+                            />
+                            {isOnline
+                              ? "ONLINE (200)"
+                              : isColdBoot
+                              ? "COLD BOOT"
+                              : isOffline
+                              ? "OFFLINE / DOWN"
+                              : "CHECKING..."}
+                          </span>
+                        </div>
+
+                        {/* URL */}
+                        <div className="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-between">
+                          <span className="text-[11px] font-mono text-[#475569] truncate max-w-[200px]">{svc.url}</span>
+                          <a
+                            href={svc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#0A4FE0] hover:text-[#0639A8]"
+                          >
+                            <ExternalLink size={13} />
+                          </a>
+                        </div>
+
+                        {/* Stats Strip */}
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="bg-[#F1F5F9] p-2.5 rounded-xl">
+                            <span className="text-[10px] font-bold text-[#64748B] block">Latency</span>
+                            <span className="font-mono font-bold text-[#0F172A]">
+                              {svc.lastLatencyMs ? `${svc.lastLatencyMs} ms` : "--"}
+                            </span>
+                          </div>
+                          <div className="bg-[#F1F5F9] p-2.5 rounded-xl">
+                            <span className="text-[10px] font-bold text-[#64748B] block">Status Code</span>
+                            <span className="font-mono font-bold text-[#0F172A]">
+                              {svc.lastStatusCode ? `HTTP ${svc.lastStatusCode}` : "--"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {svc.lastError && (
+                          <div className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-[11px] font-medium">
+                            <span className="font-bold">Error:</span> {svc.lastError}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Footer Actions */}
+                      <div className="pt-3 border-t border-[#F1F5F9] flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-[#94A3B8]">
+                          {svc.lastChecked ? new Date(svc.lastChecked).toLocaleTimeString() : "Pending"}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handlePingService(svc._id)}
+                            disabled={isPingingId === svc._id}
+                            className="flex items-center gap-1.5 bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#0A4FE0] font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            <RefreshCw size={12} className={isPingingId === svc._id ? "animate-spin" : ""} />
+                            <span>Ping</span>
+                          </button>
+                          {svc.name !== "AK Webflair Central Backend" && (
+                            <button
+                              onClick={() => handleDeleteService(svc._id)}
+                              className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg transition-colors cursor-pointer"
+                              title="Delete from monitor"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* LIVE SYSTEM LOGS & CRITICAL ALERTS */}
+            <div className="bg-white rounded-3xl p-6 border border-[#CBD5E1] shadow-xs space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2">
+                    <Terminal size={18} className="text-[#0A4FE0]" />
+                    Central System Logs & Telegram Event Stream ({logs.length})
+                  </h4>
+                  <p className="text-xs text-[#64748B]">
+                    Aggregated runtime logs, Render cold boots, and email service statuses
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleClearLogs}
+                  className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold px-3.5 py-2 rounded-xl text-xs transition-colors border border-rose-200 cursor-pointer self-start md:self-auto"
+                >
+                  <Trash2 size={13} />
+                  <span>Clear Logs</span>
+                </button>
+              </div>
+
+              {/* Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={14} />
+                  <input
+                    type="text"
+                    placeholder="Search logs message or type..."
+                    value={logSearchQuery}
+                    onChange={(e) => setLogSearchQuery(e.target.value)}
+                    className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-[#0F172A] outline-none"
+                  />
+                </div>
+
+                <select
+                  value={logProjectFilter}
+                  onChange={(e) => setLogProjectFilter(e.target.value)}
+                  className="bg-[#F8FAFC] border border-[#CBD5E1] text-xs font-bold text-[#0F172A] px-3 py-2 rounded-xl outline-none"
+                >
+                  <option value="ALL">All Projects</option>
+                  {services.map((s) => (
+                    <option key={s.name} value={s.name}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={logLevelFilter}
+                  onChange={(e) => setLogLevelFilter(e.target.value)}
+                  className="bg-[#F8FAFC] border border-[#CBD5E1] text-xs font-bold text-[#0F172A] px-3 py-2 rounded-xl outline-none"
+                >
+                  <option value="ALL">All Severities</option>
+                  <option value="critical">🚨 Critical Only</option>
+                  <option value="warn">⚠️ Warnings Only</option>
+                  <option value="error">🔴 Errors Only</option>
+                  <option value="info">ℹ️ Info Only</option>
+                </select>
+              </div>
+
+              {/* Logs Stream Table */}
+              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                {logs
+                  .filter((l) => {
+                    const matchesProj = logProjectFilter === "ALL" || l.projectName === logProjectFilter;
+                    const matchesLvl = logLevelFilter === "ALL" || l.level === logLevelFilter;
+                    const matchesQ =
+                      !logSearchQuery ||
+                      l.message?.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
+                      l.type?.toLowerCase().includes(logSearchQuery.toLowerCase());
+                    return matchesProj && matchesLvl && matchesQ;
+                  })
+                  .map((logItem, idx) => {
+                    const isCritical = logItem.level === "critical";
+                    const isWarn = logItem.level === "warn";
+                    const isError = logItem.level === "error";
+
+                    return (
+                      <div
+                        key={logItem._id || idx}
+                        className={`p-3.5 rounded-2xl border text-xs flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+                          isCritical
+                            ? "bg-rose-50/60 border-rose-200 text-rose-950"
+                            : isWarn
+                            ? "bg-amber-50/60 border-amber-200 text-amber-950"
+                            : isError
+                            ? "bg-red-50/60 border-red-200 text-red-950"
+                            : "bg-[#F8FAFC] border-[#E2E8F0] text-[#1E293B]"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase shrink-0 mt-0.5 ${
+                              isCritical
+                                ? "bg-rose-600 text-white"
+                                : isWarn
+                                ? "bg-amber-500 text-white"
+                                : isError
+                                ? "bg-red-600 text-white"
+                                : "bg-blue-600 text-white"
+                            }`}
+                          >
+                            {logItem.level}
+                          </span>
+
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-[#0F172A]">{logItem.projectName}</span>
+                              <span className="text-[10px] font-mono text-[#64748B] bg-white px-2 py-0.5 rounded border border-[#CBD5E1]">
+                                {logItem.type}
+                              </span>
+                              {logItem.telegramSent && (
+                                <span className="flex items-center gap-1 text-[10px] font-bold text-[#0A4FE0] bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                  <FaTelegramPlane size={10} /> Telegram Alert Dispatched
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-1 font-medium leading-relaxed">{logItem.message}</p>
+                          </div>
+                        </div>
+
+                        <div className="text-[11px] font-mono text-[#64748B] shrink-0 text-right">
+                          {new Date(logItem.createdAt).toLocaleString("en-IN", {
+                            dateStyle: "short",
+                            timeStyle: "medium",
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                {logs.length === 0 && (
+                  <div className="p-8 text-center text-slate-400 font-bold bg-[#F8FAFC] rounded-2xl border border-dashed border-[#CBD5E1]">
+                    No system logs recorded yet. Everything is functioning normally!
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
       </div>
+
 
       {/* PROJECT MODAL */}
       {showProjectModal && (
@@ -786,8 +1265,67 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* ADD MONITORED SERVICE MODAL */}
+      {showServiceModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-4">
+            <h3 className="text-2xl font-black text-[#0F172A]">Monitor New Backend URL</h3>
+            <p className="text-xs text-[#64748B]">
+              This URL will be pinged automatically to stay awake on Render and trigger Telegram alerts if down.
+            </p>
+            <form onSubmit={handleSaveService} className="space-y-3 text-xs font-medium">
+              <div>
+                <label className="block text-[10px] font-bold uppercase mb-1">Project Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. My New Client API"
+                  value={serviceForm.name}
+                  onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })}
+                  className="w-full p-3 rounded-xl border border-[#CBD5E1] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase mb-1">Backend Target URL</label>
+                <input
+                  type="url"
+                  required
+                  placeholder="https://my-app.onrender.com"
+                  value={serviceForm.url}
+                  onChange={(e) => setServiceForm({ ...serviceForm, url: e.target.value })}
+                  className="w-full p-3 rounded-xl border border-[#CBD5E1] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase mb-1">Health Path (optional)</label>
+                <input
+                  type="text"
+                  placeholder="/"
+                  value={serviceForm.healthPath}
+                  onChange={(e) => setServiceForm({ ...serviceForm, healthPath: e.target.value })}
+                  className="w-full p-3 rounded-xl border border-[#CBD5E1] outline-none"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowServiceModal(false)}
+                  className="flex-1 py-3 rounded-xl bg-[#F1F5F9] font-bold"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="flex-1 py-3 rounded-xl bg-[#0A4FE0] text-white font-extrabold">
+                  Start Monitoring
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default AdminDashboard;

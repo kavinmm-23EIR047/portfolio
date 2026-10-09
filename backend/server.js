@@ -11,8 +11,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 import dataRoutes from './routes/dataRoutes.js';
+import monitorRoutes from './routes/monitorRoutes.js';
+import logRoutes from './routes/logRoutes.js';
+import { startHealthMonitor } from './utils/healthMonitor.js';
+import { sendTelegramAlert } from './utils/telegramAlert.js';
+import SystemLog from './models/SystemLog.js';
 
 dotenv.config();
+
 
 // Connect to MongoDB
 if (process.env.MONGODB_URI) {
@@ -95,6 +101,43 @@ async function sendMailWithRetry(transporter, mailOptions, retries = 2, delayMs 
       return true;
     } catch (err) {
       console.warn(`⚠️ Email attempt ${i + 1} failed: ${err.message}`);
+      
+      const isQuota = /limit|quota|exceeded|credit|429|550|max|threshold/i.test(err.message);
+      const isAuth = /535|auth|credentials|invalid|password|username/i.test(err.message);
+
+      // Trigger Telegram Alert immediately on quota, auth, or last retry failure
+      if (isQuota || isAuth || i === retries - 1) {
+        try {
+          await SystemLog.create({
+            projectName: 'AK Webflair Central Backend',
+            level: 'critical',
+            type: isQuota ? 'EMAIL_QUOTA_EXCEEDED' : 'EMAIL_FAILURE',
+            message: `Email sending failed for ${mailOptions.to}: ${err.message}`,
+            details: {
+              to: mailOptions.to,
+              subject: mailOptions.subject,
+              errorType: isQuota ? 'Quota / Credit Exhausted' : isAuth ? 'SMTP Auth Error' : 'Delivery Failure',
+              attempt: i + 1,
+            },
+            telegramSent: true,
+          });
+
+          await sendTelegramAlert({
+            title: isQuota ? 'EMAIL LIMIT / QUOTA EXCEEDED' : 'EMAIL DELIVERY FAILURE',
+            level: 'critical',
+            details: {
+              'Project': 'AK Webflair Portfolio / Contact Form',
+              'Recipient': mailOptions.to,
+              'Error Reason': err.message,
+              'Issue Type': isQuota ? 'Daily Gmail/SMTP Sending Limit Reached' : isAuth ? 'Invalid Email App Password' : 'SMTP Connection Error',
+            },
+            footer: 'Action Required: Check Gmail daily limit or renew email credentials.',
+          });
+        } catch (logErr) {
+          console.error('Failed to log email alert:', logErr.message);
+        }
+      }
+
       if (i < retries - 1) {
         console.log(`⏳ Retrying in ${delayMs / 1000}s...`);
         await sleep(delayMs);
@@ -105,6 +148,7 @@ async function sendMailWithRetry(transporter, mailOptions, retries = 2, delayMs 
   }
   return false;
 }
+
 
 /* ================================
    BACKGROUND WORKER
@@ -340,11 +384,13 @@ import leadRoutes from './routes/leadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
 /* ================================
-   FEEDBACK & ADMIN ROUTE
+   APPLICATION ROUTES
 ================================ */
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/monitor', monitorRoutes);
+app.use('/api/logs', logRoutes);
 app.use('/api', dataRoutes);
 
 /* ================================
@@ -363,23 +409,54 @@ app.use((req, res) => {
 });
 
 /* ================================
-   GLOBAL ERROR HANDLERS
+   GLOBAL ERROR HANDLERS (TELEGRAM ALERT)
 ================================ */
-process.on('unhandledRejection', (err) => {
-  console.error('❌ Unhandled Rejection:', err);
+process.on('unhandledRejection', async (reason) => {
+  console.error('❌ Unhandled Rejection:', reason);
+  try {
+    await sendTelegramAlert({
+      title: 'UNHANDLED PROMISE REJECTION',
+      level: 'critical',
+      details: {
+        'Project': 'AK Webflair Central Backend',
+        'Error': reason?.message || String(reason),
+        'Stack': reason?.stack ? reason.stack.slice(0, 300) : 'N/A',
+      },
+      footer: 'Server stability may be impacted.',
+    });
+  } catch (e) {}
 });
-process.on('uncaughtException', (err) => {
+
+process.on('uncaughtException', async (err) => {
   console.error('❌ Uncaught Exception:', err);
+  try {
+    await sendTelegramAlert({
+      title: 'UNCAUGHT EXCEPTION CRASH',
+      level: 'critical',
+      details: {
+        'Project': 'AK Webflair Central Backend',
+        'Error': err?.message || String(err),
+        'Stack': err?.stack ? err.stack.slice(0, 300) : 'N/A',
+      },
+      footer: 'Immediate investigation required.',
+    });
+  } catch (e) {}
 });
 
 console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
 console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
 console.log('GOOGLE_SHEET_ID exists:', !!process.env.GOOGLE_SHEET_ID);
+console.log('TELEGRAM_BOT_TOKEN exists:', !!process.env.TELEGRAM_BOT_TOKEN);
 
 /* ================================
-   SERVER START
+   SERVER START & MONITORING
 ================================ */
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
-});
+  
+  // Start automated uptime checking and Render Keep-Alive (every 10 minutes)
+  if (process.env.MONGODB_URI) {
+    startHealthMonitor(10);
+  }
+});
