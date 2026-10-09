@@ -4,7 +4,8 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node --openssl-legacy-provider server.js"
+    "dev": "node server.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "body-parser": "^2.2.0",

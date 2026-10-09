@@ -24,7 +24,7 @@ const ScrollToTop = () => {
 
 const AppContent = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname === "/admin";
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
     <div className="relative min-h-screen overflow-x-hidden font-sans flex flex-col bg-[#F1F5F9]">
