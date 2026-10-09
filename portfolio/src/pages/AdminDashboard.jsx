@@ -841,8 +841,9 @@ const AdminDashboard = () => {
                     Monitoring Render free tier cold-starts, downtime (500/502/503), and email quota/limits.
                   </p>
                   <p className="text-[11px] font-mono text-blue-200/80 mt-1">
-                    Connected Chat ID: <span className="font-bold text-white">6739761210</span> (Kavin M M)
+                    Connected Group: <span className="font-bold text-white">Ak_webflair_alerts</span> (<span className="text-white font-semibold">-1003727922444</span>)
                   </p>
+
                 </div>
               </div>
 
