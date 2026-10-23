@@ -221,6 +221,66 @@ div {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Mobile landing hero: fixed service order, readable type and a larger dashboard. */
+@media (max-width: 639px) {
+  .hero-landing { padding-top: 2rem; padding-bottom: 3.25rem; }
+  .hero-landing-shell { padding-inline: 1.1rem; }
+  .hero-main-grid { gap: 0; }
+  .hero-service-pills {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .55rem;
+    margin-bottom: 1.65rem;
+  }
+  .hero-service-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 2.45rem;
+    padding: .45rem .3rem;
+    font-size: clamp(8px, 2.55vw, 10.5px);
+    line-height: 1.15;
+    letter-spacing: .025em;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .hero-landing-title {
+    margin-bottom: 1.1rem;
+    font-size: clamp(2rem, 10.1vw, 2.8rem);
+    line-height: .98;
+    letter-spacing: -.055em;
+  }
+  .hero-landing-title > span:first-child { margin-bottom: .25rem; }
+  .hero-landing-title-accent {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+  .hero-landing-title-accent svg { bottom: -.42rem; }
+  .hero-landing-description {
+    max-width: 100%;
+    margin-bottom: 1.4rem;
+    font-size: clamp(.94rem, 4vw, 1.05rem);
+    line-height: 1.52;
+    font-weight: 450;
+  }
+  .hero-landing-actions { gap: .55rem; }
+  .hero-landing-actions a {
+    min-height: 3.15rem;
+    padding-inline: .45rem;
+    font-size: clamp(.72rem, 3.4vw, .86rem);
+  }
+  .hero-dashboard-visual {
+    height: clamp(20rem, 86vw, 23rem);
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+  }
+  .hero-dashboard-visual > div:first-child { width: 94%; }
+  .hero-automation-sticker { display: none; }
+}
+
 /* Portfolio journal */
 .portfolio-journal { position: relative; overflow: hidden; padding: clamp(4.5rem, 8vw, 8rem) 1.25rem; background: #f6f9fe; color: #0a1b49; }.portfolio-journal::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .6; background-image: linear-gradient(rgba(32,99,210,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(32,99,210,.055) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(#000, transparent 92%); }.portfolio-journal-shell { position: relative; width: min(100%, 1320px); margin: auto; }.portfolio-journal-glow { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(15px); }.portfolio-journal-glow-one { width: 35rem; height: 35rem; top: -18rem; right: -20rem; background: rgba(136,184,255,.31); }.portfolio-journal-glow-two { width: 28rem; height: 28rem; bottom: 2rem; left: -18rem; background: rgba(130,205,255,.2); }
 .portfolio-journal-hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, .55fr); align-items: end; gap: 3rem; padding-bottom: 3.5rem; }.portfolio-kicker { display: inline-flex; align-items: center; gap: .48rem; padding: .45rem .8rem; border: 1px solid #dbe8fa; border-radius: 99px; background: rgba(255,255,255,.74); color: #1059e5; font-size: .66rem; font-weight: 850; letter-spacing: .08em; }.portfolio-kicker i { width: .38rem; height: .38rem; border-radius: 50%; background: currentColor; }.portfolio-journal-hero h2 { max-width: 830px; margin: 1.3rem 0 .85rem; color: #081941; font-size: clamp(3rem, 5.3vw, 5.5rem); font-weight: 850; letter-spacing: -.075em; line-height: .96; }.portfolio-journal-hero h2 em { color: #1059eb; font-style: normal; }.portfolio-journal-hero > div > p { max-width: 675px; color: #5b7198; font-size: 1.05rem; line-height: 1.55; font-weight: 550; }.portfolio-company-points { display: flex; flex-wrap: wrap; gap: .7rem 1rem; margin-top: 1.3rem; color: #425f8d; font-size: .74rem; font-weight: 750; }.portfolio-company-points span { display: inline-flex; align-items: center; gap: .37rem; }.portfolio-company-points svg { color: #1060ed; width: 16px; }.portfolio-company-card { padding: 1.7rem; border: 1px solid #dbe8fa; border-radius: 22px; background: rgba(255,255,255,.78); box-shadow: 0 20px 50px rgba(29,76,148,.09); }.portfolio-company-card > span { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #eaf2ff; color: #0d5df1; }.portfolio-company-card p { margin: 1rem 0 .42rem; color: #7590ba; font-size: .62rem; font-weight: 850; letter-spacing: .1em; }.portfolio-company-card h3 { margin: 0; color: #122550; font-size: 1.15rem; font-weight: 850; line-height: 1.2; }.portfolio-company-card a { display: inline-flex; align-items: center; gap: .36rem; margin-top: 1.3rem; color: #0d5df1; font-size: .77rem; font-weight: 850; }

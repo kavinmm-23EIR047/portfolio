@@ -175,7 +175,7 @@ const LegacyHero = () => {
   }, []);
 
   return (
-    <section className="relative w-full pt-8 pb-14 sm:pb-20 lg:pt-12 lg:pb-24 bg-[#0A4FE0] overflow-hidden">
+    <section className="hero-landing relative w-full pt-8 pb-14 sm:pb-20 lg:pt-12 lg:pb-24 bg-[#0A4FE0] overflow-hidden">
       {/* Matte overlay paper-texture & subtle grid effect */}
       <div
         className="absolute inset-0 opacity-[0.06] mix-blend-overlay pointer-events-none"
@@ -194,24 +194,24 @@ const LegacyHero = () => {
         }}
       />
 
-      <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16 relative z-10">
+      <div className="hero-landing-shell w-full max-w-[1600px] mx-auto px-5 sm:px-8 md:px-12 lg:px-16 relative z-10">
         
         {/* ============ MAIN TOP ROW (2 Cols on Desktop, 1 Col Stacked on Tablet/Mobile) ============ */}
-        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-12 items-center">
+        <div className="hero-main-grid grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-12 items-center">
           
           {/* ============ LEFT: HEADLINE + SERVICES + CTAS ============ */}
-          <div className="flex flex-col text-left">
+          <div className="hero-landing-copy flex flex-col text-left">
             {/* Service Pills */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex flex-wrap gap-2 sm:gap-2.5 mb-6 sm:mb-7"
+              className="hero-service-pills flex flex-wrap gap-2 sm:gap-2.5 mb-6 sm:mb-7"
             >
               {services.map((s) => (
                 <span
                   key={s}
-                  className="text-[11px] sm:text-xs md:text-sm font-extrabold uppercase tracking-wider text-white bg-white/[0.15] border border-white/20 rounded-full px-4 sm:px-5 py-1.5 sm:py-2 shadow-sm backdrop-blur-sm"
+                  className="hero-service-pill text-[11px] sm:text-xs md:text-sm font-extrabold uppercase tracking-wider text-white bg-white/[0.15] border border-white/20 rounded-full px-4 sm:px-5 py-1.5 sm:py-2 shadow-sm backdrop-blur-sm"
                 >
                   {s}
                 </span>
@@ -220,7 +220,7 @@ const LegacyHero = () => {
 
             {/* Main Headline */}
             <motion.h1
-              className="font-['Space_Grotesk',_sans-serif] text-4xl sm:text-6xl md:text-6xl lg:text-[74px] xl:text-[80px] font-extrabold leading-[1.05] tracking-tight mb-6"
+              className="hero-landing-title font-['Space_Grotesk',_sans-serif] text-4xl sm:text-6xl md:text-6xl lg:text-[74px] xl:text-[80px] font-extrabold leading-[1.05] tracking-tight mb-6"
             >
               <motion.span
                 initial={{ opacity: 0, y: 20 }}
@@ -234,7 +234,7 @@ const LegacyHero = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="relative inline-block text-[#CBD5E1]"
+                className="hero-landing-title-accent relative inline-block text-[#CBD5E1]"
               >
                 good software.
                 <svg className="absolute -bottom-2 left-0 w-full" height="14" viewBox="0 0 400 14" preserveAspectRatio="none" aria-hidden="true">
@@ -257,7 +257,7 @@ const LegacyHero = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-[#F1F5F9] text-base sm:text-xl md:text-2xl max-w-xl mb-8 sm:mb-10 leading-relaxed font-medium"
+              className="hero-landing-description text-[#F1F5F9] text-base sm:text-xl md:text-2xl max-w-xl mb-8 sm:mb-10 leading-relaxed font-medium"
             >
               Human-led software engineering and practical AI solutions for businesses in Coimbatore, Tiruppur and the wider Kongu region. We also serve clients in Chennai, Madurai, Bengaluru (Bangalore), Hyderabad, Mumbai and across India, building CRM, web, e-commerce and mobile products.
             </motion.p>
@@ -267,7 +267,7 @@ const LegacyHero = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:gap-4 w-full sm:w-auto"
+              className="hero-landing-actions grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:gap-4 w-full sm:w-auto"
             >
               <Link
                 to="/support"
@@ -285,7 +285,7 @@ const LegacyHero = () => {
           </div>
 
           {/* ============ RIGHT: COLLAGE (DASHBOARD + ROBOT + STICKERS) ============ */}
-          <div className="relative w-full h-[300px] xs:h-[350px] sm:h-[440px] md:h-[480px] lg:h-[540px] xl:h-[580px] flex items-center justify-center my-4 lg:my-0 select-none">
+          <div className="hero-dashboard-visual relative w-full h-[300px] xs:h-[350px] sm:h-[440px] md:h-[480px] lg:h-[540px] xl:h-[580px] flex items-center justify-center my-4 lg:my-0 select-none">
             {/* Dashboard Mockup Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.92, rotate: -8 }}
@@ -322,7 +322,7 @@ const LegacyHero = () => {
             <motion.div
               animate={{ rotate: 8, y: [0, 10, 0] }}
               transition={{ delay: 0.85, duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-[4%] left-[-1%] sm:left-[-3%] bg-[#CBD5E1] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-2xl z-30"
+              className="hero-automation-sticker absolute bottom-[4%] left-[-1%] sm:left-[-3%] bg-[#CBD5E1] rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-2xl z-30"
             >
               <FaBolt className="text-[#0A4FE0]" size={20} />
             </motion.div>
