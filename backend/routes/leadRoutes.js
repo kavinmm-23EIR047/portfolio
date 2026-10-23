@@ -32,8 +32,10 @@ const getJsonLeads = () => {
 const saveJsonLeads = (leads) => {
   try {
     fs.writeFileSync(LEADS_FILE, JSON.stringify(leads, null, 2), 'utf-8');
+    return true;
   } catch (err) {
     console.error('Failed to write leads.json:', err.message);
+    return false;
   }
 };
 
@@ -68,7 +70,7 @@ router.get('/', async (req, res) => {
 // POST new lead
 router.post('/', async (req, res) => {
   try {
-    const { name, phone, email, service, budget, comment, mindsetIntent, suggestedStack, source } = req.body;
+    const { name, phone, email, service, budget, comment, mindsetIntent, suggestedStack, source, language } = req.body;
 
     if (!name || !phone) {
       return res.status(400).json({ success: false, message: 'Name and Phone are required' });
@@ -79,6 +81,7 @@ router.post('/', async (req, res) => {
       name,
       phone,
       email: email || '',
+      language: language || '',
       service: service || 'CRM & UI Dashboards',
       budget: budget || 'Standard',
       comment: comment || '',
@@ -103,7 +106,9 @@ router.post('/', async (req, res) => {
     // Always save to JSON file fallback
     const existing = getJsonLeads();
     existing.unshift(newLeadData);
-    saveJsonLeads(existing);
+    if (!saveJsonLeads(existing) && createdLead === newLeadData) {
+      return res.status(500).json({ success: false, message: 'Failed to save lead to the configured storage' });
+    }
 
     res.status(201).json({ success: true, message: 'Lead recorded successfully', lead: createdLead });
   } catch (err) {
@@ -114,17 +119,38 @@ router.post('/', async (req, res) => {
 // PUT update lead status
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, callResult } = req.body;
+  const updates = {};
+
+  if (status !== undefined) {
+    if (!['New', 'Contacted', 'In Discussion', 'Closed'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid lead status' });
+    }
+    updates.status = status;
+  }
+
+  if (callResult !== undefined) {
+    if (!callResult || typeof callResult !== 'object' || Array.isArray(callResult)) {
+      return res.status(400).json({ success: false, message: 'Call result must be an object' });
+    }
+    updates.callResult = callResult;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ success: false, message: 'No lead updates provided' });
+  }
 
   try {
-    if (Lead.db && Lead.db.readyState === 1) {
-      await Lead.findByIdAndUpdate(id, { status });
+    if (Lead.db && Lead.db.readyState === 1 && Lead.db.base.isValidObjectId(id)) {
+      await Lead.findByIdAndUpdate(id, updates, { runValidators: true });
     }
     const leads = getJsonLeads();
-    const updated = leads.map((l) => (l._id === id || l.id === id ? { ...l, status } : l));
-    saveJsonLeads(updated);
+    const updated = leads.map((l) => (l._id === id || l.id === id ? { ...l, ...updates } : l));
+    if (!saveJsonLeads(updated)) {
+      return res.status(500).json({ success: false, message: 'Failed to save lead updates' });
+    }
 
-    res.json({ success: true, message: 'Lead status updated' });
+    res.json({ success: true, message: 'Lead updated successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

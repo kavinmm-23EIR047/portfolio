@@ -2,5 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://akwebflairtechnologies.vercel.app/sitemap.xml
-Sitemap: https://akwebflairtechnologies.vercel.app/sitemap_index.xml
+Sitemap: https://akwebflairtechnologies.in/sitemap.xml
+Sitemap: https://akwebflairtechnologies.in/sitemap_index.xml
