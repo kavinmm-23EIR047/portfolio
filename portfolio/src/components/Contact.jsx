@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaPaperPlane, FaWhatsapp } from "react-icons/fa";
 
-const Contact = () => {
+const Contact = ({ headingAs = "h2" }) => {
+  const SectionHeading = headingAs;
   const { register, handleSubmit, reset } = useForm();
   const [status, setStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,9 +72,9 @@ const Contact = () => {
             Direct WhatsApp Enquiry
           </div>
 
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
+          <SectionHeading className="text-4xl sm:text-5xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
             Start Your Project with <span className="text-[#0A4FE0]">WebFlair</span>
-          </h2>
+          </SectionHeading>
 
           <p className="mt-4 text-[#64748B] text-lg font-medium max-w-2xl mx-auto">
             Fill out your project details below to automatically open WhatsApp and chat directly with Founder Kavin M M.

@@ -27,7 +27,8 @@ const hasImage = (img) => typeof img === "string" && img.trim().length > 0;
 /* =========================================================================
    3D COVERFLOW PORTFOLIO WITH CLEAN, HIGH-FIDELITY HOVER & CLICK EXPERIENCE
    ========================================================================= */
-const LegacyPortfolio = () => {
+const LegacyPortfolio = ({ headingAs = "h2" }) => {
+  const SectionHeading = headingAs;
   const [activeFilter, setActiveFilter] = useState("all");
   const [projectList, setProjectList] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -202,9 +203,9 @@ const LegacyPortfolio = () => {
               FEATURED CASE STUDIES
             </div>
 
-            <h2 className="text-3xl sm:text-5xl lg:text-[56px] font-black text-white leading-[1.1] tracking-tight mb-3 sm:mb-4">
+            <SectionHeading className="text-3xl sm:text-5xl lg:text-[56px] font-black text-white leading-[1.1] tracking-tight mb-3 sm:mb-4">
               Selected Client Projects
-            </h2>
+            </SectionHeading>
 
             <p className="text-white/80 text-xs sm:text-base lg:text-lg font-medium leading-relaxed max-w-2xl mx-auto">
               Explore our track record of shipping fast, scalable CRM systems, UI dashboards, e-commerce stores, and AI automations.

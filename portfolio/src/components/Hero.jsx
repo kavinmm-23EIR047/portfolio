@@ -220,36 +220,37 @@ const LegacyHero = () => {
 
             {/* Main Headline */}
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-['Space_Grotesk',_sans-serif] text-4xl sm:text-6xl md:text-6xl lg:text-[74px] xl:text-[80px] font-extrabold text-white leading-[1.05] tracking-tight mb-2 sm:mb-3"
+              className="font-['Space_Grotesk',_sans-serif] text-4xl sm:text-6xl md:text-6xl lg:text-[74px] xl:text-[80px] font-extrabold leading-[1.05] tracking-tight mb-6"
             >
-              We build
-            </motion.h1>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative w-max mb-6"
-            >
-              <h1 className="font-['Space_Grotesk',_sans-serif] text-4xl sm:text-6xl md:text-6xl lg:text-[74px] xl:text-[80px] font-extrabold text-[#CBD5E1] leading-[1.05] tracking-tight">
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="block text-white mb-2 sm:mb-3"
+              >
+                We build
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="relative inline-block text-[#CBD5E1]"
+              >
                 good software.
-              </h1>
-              <svg className="absolute -bottom-2 left-0 w-full" height="14" viewBox="0 0 400 14" preserveAspectRatio="none">
-                <motion.path
-                  d="M2 10 Q100 2 200 8 T398 6"
-                  stroke="#FFFFFF"
-                  strokeWidth="5"
-                  fill="none"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
-                />
-              </svg>
-            </motion.div>
+                <svg className="absolute -bottom-2 left-0 w-full" height="14" viewBox="0 0 400 14" preserveAspectRatio="none" aria-hidden="true">
+                  <motion.path
+                    d="M2 10 Q100 2 200 8 T398 6"
+                    stroke="#FFFFFF"
+                    strokeWidth="5"
+                    fill="none"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+                  />
+                </svg>
+              </motion.span>
+            </motion.h1>
 
             {/* Subtitle Paragraph */}
             <motion.p
@@ -258,7 +259,7 @@ const LegacyHero = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-[#F1F5F9] text-base sm:text-xl md:text-2xl max-w-xl mb-8 sm:mb-10 leading-relaxed font-medium"
             >
-              CRM platforms, UI dashboards, high-converting e-commerce & landing pages, and Python AI automation agents built with MERN, Postgres, Flutter, and React Native.
+              Human-led software engineering and practical AI solutions for businesses in Coimbatore, Tiruppur and the wider Kongu region. We also serve clients in Chennai, Madurai, Bengaluru (Bangalore), Hyderabad, Mumbai and across India, building CRM, web, e-commerce and mobile products.
             </motion.p>
 
             {/* CTA Buttons */}

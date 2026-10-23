@@ -57,7 +57,7 @@ const expertise = [
     icon: <SiNextdotjs size={30} className="text-[#0F172A]" />,
     title: "Landing, E-Commerce & SEO Optimization",
     description:
-      "Ultra-fast landing pages, full-featured D2C/B2B e-commerce platforms, SSR/SSG rendering, Core Web Vitals optimization, and top search ranking SEO.",
+      "Fast landing pages, D2C/B2B e-commerce platforms, server rendering, Core Web Vitals improvements, and technical SEO foundations.",
     stack: ["Landing Pages", "E-Commerce Stores", "Razorpay Gateways", "Technical SEO", "Core Web Vitals"],
   },
   {

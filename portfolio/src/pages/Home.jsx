@@ -32,6 +32,7 @@ import Services from "../components/Services";
 import Portfolio from "../components/Portfolio";
 import Reviews from "../components/Reviews";
 import FAQ from "../components/FAQ";
+import Seo from "../components/Seo";
 
 /* =========================================================================
    INTERACTIVE SPECTRUM & BACKEND-INTEGRATED FEATURE SHOWCASE FOR HOME
@@ -62,7 +63,7 @@ const capabilitiesTabs = [
   {
     id: "ecommerce",
     title: "Landing & E-Commerce",
-    pill: "100/100 Core Web Vitals",
+    pill: "Core Web Vitals",
     icon: FaRocket,
     color: "#059669",
     bg: "bg-[#ECFDF5]",
@@ -75,7 +76,7 @@ const capabilitiesTabs = [
       { name: "SEO Engine", icon: FiSearch, color: "#10B981" },
       { name: "React", icon: SiReact, color: "#61DAFB" },
     ],
-    metric: "100/100 Core Web Vitals",
+    metric: "Performance-focused builds",
     widgetTitle: "Direct Storefront Checkout",
     widgetValue: "0.4s",
     widgetStatus: "Frictionless Conversion",
@@ -322,7 +323,7 @@ const HomeInteractiveSpectrum = () => {
             {[
               { val: `${projectCount}+`, label: "Projects Shipped" },
               { val: "24/7", label: "Autonomous Sync" },
-              { val: "100/100", label: "Core Web Vitals" },
+              { val: "CWV", label: "Performance Focus" },
               { val: "5.0", isRating: true, label: "Client Rating" },
             ].map((stat, i) => (
               <div
@@ -363,6 +364,7 @@ const HomeInteractiveSpectrum = () => {
 const Home = () => {
   return (
     <div className="pt-0 bg-[#F8FAFC]">
+      <Seo path="/" />
       <Hero />
       <TrustedPartners />
       <HomeInteractiveSpectrum />

@@ -1,5 +1,22 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "akwebflairtechnologies.vercel.app"
+        }
+      ],
+      "destination": "https://akwebflairtechnologies.in/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
+    { "source": "/services", "destination": "/services-seo.html" },
+    { "source": "/products", "destination": "/products-seo.html" },
+    { "source": "/about", "destination": "/about-seo.html" },
+    { "source": "/support", "destination": "/support-seo.html" },
     {
       "source": "/(.*)",
       "destination": "/index.html"

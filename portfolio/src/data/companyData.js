@@ -46,8 +46,8 @@ export const companyProfile = {
     {
       id: "seo",
       name: "SEO & Performance Optimization",
-      summary: "Technical SEO, 100/100 Core Web Vitals, SSR rendering, Schema.org metadata, and lightning speed foundations that drive search visibility.",
-      outcomes: ["100/100 Core Web Vitals", "Technical SEO", "Schema.org Markup", "High Search Rankings"],
+      summary: "Technical SEO foundations, structured metadata, accessible page structure, and performance improvements that help search engines understand your site.",
+      outcomes: ["Technical SEO Foundations", "Structured Metadata", "Accessible Page Structure", "Performance Improvements"],
       stack: ["Next.js SSR", "Google Lighthouse", "Schema Markup", "Edge Caching"],
     },
   ],
@@ -82,7 +82,7 @@ export function getAgentReply(question) {
   if (/flutter|react native|mobile|ios|android/.test(input)) return "We build cross-platform mobile apps for iOS and Android using Flutter and React Native with 60fps performance, offline caching, and native device integrations.";
   if (/python|ai|agent|automation/.test(input)) return "We build autonomous Python AI automation agents and LLM-powered workflows that connect CRM data, qualify leads, and handle routine business operations 24/7.";
   if (/crm|dashboard|ui/.test(input)) return "We engineer custom CRM platforms and real-time UI dashboards with interactive metrics, pipeline tracking, role-based access, and seamless database sync.";
-  if (/landing|ecommerce|e-commerce|store|seo/.test(input)) return "We create high-converting landing pages and modern e-commerce storefronts with 100/100 Core Web Vitals speed and technical SEO optimizations.";
+  if (/landing|ecommerce|e-commerce|store|seo/.test(input)) return "We create landing pages and modern e-commerce storefronts with technical SEO foundations and performance improvements.";
   if (/price|cost|budget|quote/.test(input)) return "Project investment depends on the product scope, integrations, and timeline. Share your goal through our contact page and WebFlair will return with a practical scope and estimate.";
   if (/timeline|how long|duration/.test(input)) return "A focused website, dashboard, or prototype can usually move in 2–4 weeks. Full CRM, AI agents, or cross-platform mobile apps are delivered in visible 4–8 week sprints.";
   if (/contact|phone|email|talk|call/.test(input)) return `You can reach the WebFlair team at ${companyProfile.phone} or ${companyProfile.email}. The Support page also has a project enquiry form.`;

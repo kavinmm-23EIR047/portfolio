@@ -71,7 +71,7 @@ const mobileServiceCapabilities = [
   },
   {
     title: "SEO & Core Web Vitals",
-    desc: "100/100 speed benchmarks & technical markup.",
+    desc: "Core Web Vitals improvements & technical SEO.",
     path: "/services",
     icon: FaSearch,
     color: "#7C3AED",

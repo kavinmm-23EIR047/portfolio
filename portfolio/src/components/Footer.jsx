@@ -199,7 +199,7 @@ const Footer = () => {
               <ul className="space-y-3.5 text-sm font-medium text-[#CBD5E1]">
                 <li className="flex items-start gap-3">
                   <FaMapMarkerAlt className="mt-1 text-white flex-shrink-0" size={16} />
-                  <span>Coimbatore & Tiruppur, Tamil Nadu | Chennai, Bangalore & India</span>
+                  <span>Tiruppur &amp; Coimbatore, Kongu region | Chennai, Madurai, Bengaluru, Hyderabad, Mumbai &amp; India</span>
                 </li>
                 <li>
                   <a href="mailto:akwebflairtechnologies@gmail.com" className="flex items-center gap-3 hover:text-white transition-colors">

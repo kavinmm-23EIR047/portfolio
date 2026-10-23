@@ -3,4 +3,3 @@ Allow: /
 Disallow: /admin
 
 Sitemap: https://akwebflairtechnologies.in/sitemap.xml
-Sitemap: https://akwebflairtechnologies.in/sitemap_index.xml

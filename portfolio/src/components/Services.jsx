@@ -70,7 +70,7 @@ const DashboardEcommerceIllustration = () => (
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         className="bg-[#10B981] text-white text-[9px] font-mono font-bold px-2.5 py-0.5 rounded-full shadow-xs flex items-center gap-1"
       >
-        <FiSearch size={10} /> 100% SEO Score
+        <FiSearch size={10} /> Technical SEO
       </motion.span>
     </div>
 
@@ -80,15 +80,15 @@ const DashboardEcommerceIllustration = () => (
       <div className="grid grid-cols-3 gap-1.5 text-center">
         <div className="bg-[#F8FAFC] p-1 rounded-lg border border-[#F1F5F9]">
           <p className="text-[7.5px] font-bold text-[#64748B]">Store Performance</p>
-          <p className="text-[10px] font-mono font-extrabold text-[#0F172A]">99.8% Speed</p>
+          <p className="text-[10px] font-mono font-extrabold text-[#0F172A]">Core Web Vitals</p>
         </div>
         <div className="bg-[#ECFDF5] p-1 rounded-lg border border-[#D1FAE5]">
           <p className="text-[7.5px] font-bold text-[#059669]">Conversion</p>
           <p className="text-[10px] font-mono font-extrabold text-[#059669] flex items-center justify-center gap-0.5">+4.8% <FiTrendingUp size={10} /></p>
         </div>
         <div className="bg-[#EEF2FF] p-1 rounded-lg border border-[#E0E7FF]">
-          <p className="text-[7.5px] font-bold text-[#0A4FE0]">Page Speed</p>
-          <p className="text-[10px] font-mono font-extrabold text-[#0A4FE0]">0.4s (99.8)</p>
+          <p className="text-[7.5px] font-bold text-[#0A4FE0]">Technical SEO</p>
+          <p className="text-[10px] font-mono font-extrabold text-[#0A4FE0]">Page Experience</p>
         </div>
       </div>
 
@@ -725,7 +725,8 @@ const TechFlowMap = () => {
    MAIN SERVICES COMPONENT
    ========================================================================= */
 
-const Services = () => {
+const Services = ({ headingAs = "h2" }) => {
+  const SectionHeading = headingAs;
   return (
     <section id="services" className="py-12 sm:py-16 px-4 sm:px-8 lg:px-14 bg-[#F8FAFC] relative overflow-hidden">
       
@@ -758,9 +759,9 @@ const Services = () => {
               OUR CORE CAPABILITIES
             </div>
 
-            <h2 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-[#0F172A] tracking-tight leading-[1.12]">
+            <SectionHeading className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-[#0F172A] tracking-tight leading-[1.12]">
               Services Built for <span className="text-[#0A4FE0]">Real Impact</span>
-            </h2>
+            </SectionHeading>
 
             <p className="mt-4 text-base sm:text-lg text-[#64748B] font-medium leading-relaxed max-w-2xl mx-auto">
               We design and construct production-grade CRM platforms, UI dashboards, high-converting landing & e-commerce pages, Python AI automation agents, and cross-platform mobile apps with SEO excellence.
