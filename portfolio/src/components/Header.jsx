@@ -199,7 +199,7 @@ const Header = () => {
             : "bg-[#0A4FE0] border-b border-white/10 py-4 md:py-5"
         }`}
       >
-        <div className="relative w-full max-w-[1600px] mx-auto px-5 sm:px-6 lg:px-10 flex items-center justify-between">
+        <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-6 lg:px-10 flex items-center justify-between">
           
           {/* BRAND LOGO */}
           <Link to="/" className="flex items-center gap-3 cursor-pointer group">

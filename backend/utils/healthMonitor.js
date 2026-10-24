@@ -2,7 +2,7 @@ import MonitoredService from '../models/MonitoredService.js';
 import SystemLog from '../models/SystemLog.js';
 import { sendTelegramAlert } from './telegramAlert.js';
 
-// Default initial services to monitor (All 5 Render Deployed Backends)
+// Default initial services to monitor (3 Render deployed backends)
 const DEFAULT_SERVICES = [
   {
     name: 'Sakthi Frozen Foods E-Commerce',
@@ -15,20 +15,6 @@ const DEFAULT_SERVICES = [
     name: 'Chocolate Mine Client Project',
     url: process.env.URL_CHOCOLATE_MINE || 'https://chocolate-mine-client-project-mc7x.onrender.com',
     healthPath: '/health',
-    checkIntervalMinutes: 10,
-    isActive: true,
-  },
-  {
-    name: 'Memories Platform Holidays Backend',
-    url: process.env.URL_MEMORIES_PLATFORM || 'https://memories-platform-holidays-backend.onrender.com',
-    healthPath: '/',
-    checkIntervalMinutes: 10,
-    isActive: true,
-  },
-  {
-    name: 'Crazy Capture Studio Backend',
-    url: process.env.URL_CRAZY_CAPTURE_STUDIO || 'https://crazy-capture-studio-backend.onrender.com',
-    healthPath: '/',
     checkIntervalMinutes: 10,
     isActive: true,
   },
@@ -46,6 +32,16 @@ const DEFAULT_SERVICES = [
  */
 export async function seedMonitoredServices() {
   try {
+    // Remove services that are no longer part of backend monitoring.
+    await MonitoredService.deleteMany({
+      name: {
+        $in: [
+          'Memories Platform Holidays Backend',
+          'Crazy Capture Studio Backend',
+        ],
+      },
+    });
+
     for (const service of DEFAULT_SERVICES) {
       const exists = await MonitoredService.findOne({ name: service.name });
       if (!exists) {
