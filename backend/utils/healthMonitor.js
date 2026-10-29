@@ -27,19 +27,27 @@ const DEFAULT_SERVICES = [
   },
 ];
 
+const RETIRED_SERVICE_NAMES = [
+  'Memories Platform Holidays Backend',
+  'Crazy Capture Studio Backend',
+];
+
+const RETIRED_SERVICE_URLS = [
+  /memories-platform-holidays\.vercel\.app/i,
+  /crazy-capture-studio\.vercel\.app/i,
+];
+
 /**
  * Initializes default services in the database if they don't exist
  */
 export async function seedMonitoredServices() {
   try {
-    // Remove services that are no longer part of backend monitoring.
+    // Remove only these retired website monitors; keep project showcase data intact.
     await MonitoredService.deleteMany({
-      name: {
-        $in: [
-          'Memories Platform Holidays Backend',
-          'Crazy Capture Studio Backend',
-        ],
-      },
+      $or: [
+        { name: { $in: RETIRED_SERVICE_NAMES } },
+        ...RETIRED_SERVICE_URLS.map((url) => ({ url: { $regex: url } })),
+      ],
     });
 
     for (const service of DEFAULT_SERVICES) {
