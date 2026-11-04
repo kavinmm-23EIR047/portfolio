@@ -1,11 +1,11 @@
-import nodemailer from 'nodemailer';
 import SystemLog from '../models/SystemLog.js';
 import { sendTelegramAlert } from './telegramAlert.js';
 
 // Previous status tracking for alert deduplication
 const statusHistory = {
   sakthiBrevo: 'unknown',
-  chocolateMineSmtp: 'unknown',
+  sakthiTelegram: 'unknown',
+  chocolateMineBrevo: 'unknown',
   chocolateMineTelegram: 'unknown',
 };
 
@@ -14,21 +14,27 @@ let cachedClientServices = null;
 let lastCheckedTimestamp = null;
 
 /**
- * 1. Check Sakthi Frozen Foods Brevo Email API & Quota
+ * Generic Brevo Account API and Daily Quota Health Check
  */
-export async function checkSakthiBrevoEmail() {
-  const apiKey = process.env.SAKTHI_BREVO_API_KEY;
+async function checkBrevoAccount({
+  id,
+  projectName,
+  serviceType = 'Email (Brevo API)',
+  apiKey,
+  envKeyName,
+  statusKey,
+}) {
   const startTime = Date.now();
 
   if (!apiKey) {
     return {
-      id: 'sakthi-brevo',
-      projectName: 'Sakthi Frozen Foods',
-      serviceType: 'Email (Brevo API)',
+      id,
+      projectName,
+      serviceType,
       status: 'error',
       statusCode: null,
       latencyMs: 0,
-      details: { error: 'SAKTHI_BREVO_API_KEY is not configured in backend .env' },
+      details: { error: `${envKeyName} is not configured in backend .env` },
       lastChecked: new Date(),
     };
   }
@@ -54,11 +60,11 @@ export async function checkSakthiBrevoEmail() {
       const errorMsg = errData.message || `HTTP ${response.status} ${response.statusText}`;
 
       // Status changed to error -> Alert!
-      if (statusHistory.sakthiBrevo !== 'error') {
-        statusHistory.sakthiBrevo = 'error';
+      if (statusHistory[statusKey] !== 'error') {
+        statusHistory[statusKey] = 'error';
 
         await SystemLog.create({
-          projectName: 'Sakthi Frozen Foods',
+          projectName,
           level: 'critical',
           type: 'EMAIL_FAILURE',
           message: `Brevo Email API failed: ${errorMsg}`,
@@ -69,10 +75,10 @@ export async function checkSakthiBrevoEmail() {
         });
 
         await sendTelegramAlert({
-          title: 'Sakthi Frozen Foods - Brevo Email Failed',
+          title: `${projectName} - Brevo Email Failed`,
           level: 'critical',
           details: {
-            'Project': 'Sakthi Frozen Foods',
+            'Project': projectName,
             'Service': 'Brevo Email API',
             'Status': `HTTP ${response.status} Failed`,
             'Error Reason': errorMsg,
@@ -82,9 +88,9 @@ export async function checkSakthiBrevoEmail() {
       }
 
       return {
-        id: 'sakthi-brevo',
-        projectName: 'Sakthi Frozen Foods',
-        serviceType: 'Email (Brevo API)',
+        id,
+        projectName,
+        serviceType,
         status: 'error',
         statusCode: response.status,
         latencyMs,
@@ -108,11 +114,11 @@ export async function checkSakthiBrevoEmail() {
     else if (isQuotaWarning) currentStatus = 'quota_warning';
 
     // Trigger quota alert if state transitioned
-    if (isQuotaExceeded && statusHistory.sakthiBrevo !== 'quota_exceeded') {
-      statusHistory.sakthiBrevo = 'quota_exceeded';
+    if (isQuotaExceeded && statusHistory[statusKey] !== 'quota_exceeded') {
+      statusHistory[statusKey] = 'quota_exceeded';
 
       await SystemLog.create({
-        projectName: 'Sakthi Frozen Foods',
+        projectName,
         level: 'critical',
         type: 'EMAIL_QUOTA_EXCEEDED',
         message: `Brevo Daily Email Limit Exceeded! 0 credits remaining.`,
@@ -123,38 +129,38 @@ export async function checkSakthiBrevoEmail() {
       });
 
       await sendTelegramAlert({
-        title: 'Sakthi Frozen Foods - Email Limit Exceeded',
+        title: `${projectName} - Email Limit Exceeded`,
         level: 'critical',
         details: {
-          'Project': 'Sakthi Frozen Foods',
+          'Project': projectName,
           'Service': 'Brevo Transactional Email',
           'Credits Remaining': `${remainingCredits} / 300 daily limit`,
           'Status': 'OUT OF CREDITS ❌',
         },
-        footer: 'Customer enquiries will NOT receive emails until midnight reset or quota upgrade.',
+        footer: 'Customer notifications will NOT send until midnight reset or quota upgrade.',
       });
-    } else if (isQuotaWarning && statusHistory.sakthiBrevo !== 'quota_warning') {
-      statusHistory.sakthiBrevo = 'quota_warning';
+    } else if (isQuotaWarning && statusHistory[statusKey] !== 'quota_warning') {
+      statusHistory[statusKey] = 'quota_warning';
 
       await sendTelegramAlert({
-        title: 'Sakthi Frozen Foods - Email Quota Warning',
+        title: `${projectName} - Email Quota Warning`,
         level: 'warn',
         details: {
-          'Project': 'Sakthi Frozen Foods',
+          'Project': projectName,
           'Service': 'Brevo Transactional Email',
           'Remaining Credits': `${remainingCredits} emails left`,
           'Warning': 'Approaching daily 300 free limit',
         },
-        footer: 'Monitor enquiries or upgrade Brevo credits.',
+        footer: 'Monitor enquiries/orders or upgrade Brevo credits.',
       });
-    } else if (currentStatus === 'healthy' && statusHistory.sakthiBrevo !== 'healthy' && statusHistory.sakthiBrevo !== 'unknown') {
+    } else if (currentStatus === 'healthy' && statusHistory[statusKey] !== 'healthy' && statusHistory[statusKey] !== 'unknown') {
       // Recovery Alert
-      statusHistory.sakthiBrevo = 'healthy';
+      statusHistory[statusKey] = 'healthy';
       await sendTelegramAlert({
-        title: 'Sakthi Frozen Foods - Email Restored',
+        title: `${projectName} - Email Restored`,
         level: 'info',
         details: {
-          'Project': 'Sakthi Frozen Foods',
+          'Project': projectName,
           'Service': 'Brevo Email API',
           'Credits Available': `${remainingCredits}`,
           'Status': 'Active & Ready ✅',
@@ -162,13 +168,13 @@ export async function checkSakthiBrevoEmail() {
         footer: 'Email dispatch is operating normally.',
       });
     } else {
-      statusHistory.sakthiBrevo = currentStatus;
+      statusHistory[statusKey] = currentStatus;
     }
 
     return {
-      id: 'sakthi-brevo',
-      projectName: 'Sakthi Frozen Foods',
-      serviceType: 'Email (Brevo API)',
+      id,
+      projectName,
+      serviceType,
       status: currentStatus,
       statusCode: 200,
       latencyMs,
@@ -186,14 +192,14 @@ export async function checkSakthiBrevoEmail() {
     const latencyMs = Date.now() - startTime;
     const errorMsg = error.name === 'AbortError' ? 'Brevo API Timed Out (12s limit)' : error.message;
 
-    if (statusHistory.sakthiBrevo !== 'error') {
-      statusHistory.sakthiBrevo = 'error';
+    if (statusHistory[statusKey] !== 'error') {
+      statusHistory[statusKey] = 'error';
 
       await sendTelegramAlert({
-        title: 'Sakthi Frozen Foods - Brevo API Unreachable',
+        title: `${projectName} - Brevo API Unreachable`,
         level: 'critical',
         details: {
-          'Project': 'Sakthi Frozen Foods',
+          'Project': projectName,
           'Service': 'Brevo Email API',
           'Error Reason': errorMsg,
         },
@@ -202,9 +208,9 @@ export async function checkSakthiBrevoEmail() {
     }
 
     return {
-      id: 'sakthi-brevo',
-      projectName: 'Sakthi Frozen Foods',
-      serviceType: 'Email (Brevo API)',
+      id,
+      projectName,
+      serviceType,
       status: 'error',
       statusCode: 0,
       latencyMs,
@@ -215,150 +221,28 @@ export async function checkSakthiBrevoEmail() {
 }
 
 /**
- * 2. Check Chocolate Mine Gmail SMTP Email Connection
+ * Generic Telegram Bot Health Check
  */
-export async function checkChocolateMineSmtp() {
-  const host = process.env.CHOCOLATE_MINE_SMTP_HOST || 'smtp.gmail.com';
-  const port = Number(process.env.CHOCOLATE_MINE_SMTP_PORT) || 587;
-  const user = process.env.CHOCOLATE_MINE_SMTP_USER;
-  const pass = process.env.CHOCOLATE_MINE_SMTP_PASS;
-  const startTime = Date.now();
-
-  if (!user || !pass) {
-    return {
-      id: 'chocolate-mine-smtp',
-      projectName: 'The Chocolate Mine',
-      serviceType: 'Email (Gmail SMTP)',
-      status: 'error',
-      statusCode: null,
-      latencyMs: 0,
-      details: { error: 'CHOCOLATE_MINE_SMTP_USER or PASS not configured in backend .env' },
-      lastChecked: new Date(),
-    };
-  }
-
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-    connectionTimeout: 12000,
-    greetingTimeout: 10000,
-  });
-
-  return new Promise((resolve) => {
-    transporter.verify(async (error, success) => {
-      const latencyMs = Date.now() - startTime;
-
-      if (error) {
-        const errorMsg = error.message;
-        const isAuth = /535|auth|credentials|invalid|password|username/i.test(errorMsg);
-        const isQuota = /limit|quota|exceeded|credit|429|550|max/i.test(errorMsg);
-
-        if (statusHistory.chocolateMineSmtp !== 'error') {
-          statusHistory.chocolateMineSmtp = 'error';
-
-          await SystemLog.create({
-            projectName: 'The Chocolate Mine',
-            level: 'critical',
-            type: isQuota ? 'EMAIL_QUOTA_EXCEEDED' : 'EMAIL_FAILURE',
-            message: `SMTP Connection Failed: ${errorMsg}`,
-            statusCode: 500,
-            latencyMs,
-            details: {
-              host,
-              port,
-              user,
-              issue: isAuth ? 'Invalid Gmail App Password' : isQuota ? 'Daily 500-send limit exceeded' : 'SMTP Error',
-              error: errorMsg,
-            },
-            telegramSent: true,
-          });
-
-          await sendTelegramAlert({
-            title: isQuota ? 'Chocolate Mine - Email Limit Exceeded' : 'Chocolate Mine - SMTP Email Error',
-            level: 'critical',
-            details: {
-              'Project': 'The Chocolate Mine',
-              'Service': `Gmail SMTP (${host}:${port})`,
-              'Account': user,
-              'Error Reason': errorMsg,
-              'Suspected Issue': isAuth ? 'Gmail App Password invalid or revoked' : isQuota ? 'Daily 500 Gmail limit reached' : 'Connection Refused',
-            },
-            footer: 'Action Required: Verify Gmail App Password in Google Account settings.',
-          });
-        }
-
-        resolve({
-          id: 'chocolate-mine-smtp',
-          projectName: 'The Chocolate Mine',
-          serviceType: 'Email (Gmail SMTP)',
-          status: 'error',
-          statusCode: 500,
-          latencyMs,
-          details: {
-            host,
-            port,
-            user,
-            error: errorMsg,
-            issue: isAuth ? 'Invalid App Password' : isQuota ? 'Daily Gmail Limit Reached' : 'Connection Failed',
-          },
-          lastChecked: new Date(),
-        });
-      } else {
-        // Recovery Alert if was down
-        if (statusHistory.chocolateMineSmtp === 'error') {
-          await sendTelegramAlert({
-            title: 'Chocolate Mine - Email SMTP Restored',
-            level: 'info',
-            details: {
-              'Project': 'The Chocolate Mine',
-              'Service': `Gmail SMTP (${host}:${port})`,
-              'Account': user,
-              'Status': 'Server Ready & Authenticated ✅',
-            },
-            footer: 'Order confirmations and invoices can now send normally.',
-          });
-        }
-        statusHistory.chocolateMineSmtp = 'healthy';
-
-        resolve({
-          id: 'chocolate-mine-smtp',
-          projectName: 'The Chocolate Mine',
-          serviceType: 'Email (Gmail SMTP)',
-          status: 'healthy',
-          statusCode: 200,
-          latencyMs,
-          details: {
-            host,
-            port,
-            account: user,
-            message: 'SMTP handshake and authentication verified successfully',
-          },
-          lastChecked: new Date(),
-        });
-      }
-    });
-  });
-}
-
-/**
- * 3. Check Chocolate Mine Telegram Alert Bot
- */
-export async function checkChocolateMineTelegram() {
-  const token = process.env.CHOCOLATE_MINE_TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.CHOCOLATE_MINE_TELEGRAM_CHAT_ID;
+async function checkTelegramBot({
+  id,
+  projectName,
+  serviceType = 'Telegram Notification Bot',
+  token,
+  chatId,
+  envTokenName,
+  statusKey,
+}) {
   const startTime = Date.now();
 
   if (!token) {
     return {
-      id: 'chocolate-mine-telegram',
-      projectName: 'The Chocolate Mine',
-      serviceType: 'Telegram Notification Bot',
+      id,
+      projectName,
+      serviceType,
       status: 'error',
       statusCode: null,
       latencyMs: 0,
-      details: { error: 'CHOCOLATE_MINE_TELEGRAM_BOT_TOKEN not configured in backend .env' },
+      details: { error: `${envTokenName} not configured in backend .env` },
       lastChecked: new Date(),
     };
   }
@@ -379,11 +263,11 @@ export async function checkChocolateMineTelegram() {
     if (!response.ok || !data.ok) {
       const errorMsg = data.description || `HTTP ${response.status} ${response.statusText}`;
 
-      if (statusHistory.chocolateMineTelegram !== 'error') {
-        statusHistory.chocolateMineTelegram = 'error';
+      if (statusHistory[statusKey] !== 'error') {
+        statusHistory[statusKey] = 'error';
 
         await SystemLog.create({
-          projectName: 'The Chocolate Mine',
+          projectName,
           level: 'critical',
           type: 'SERVER_DOWN',
           message: `Telegram Bot getMe failed: ${errorMsg}`,
@@ -394,11 +278,11 @@ export async function checkChocolateMineTelegram() {
         });
 
         await sendTelegramAlert({
-          title: 'Chocolate Mine - Telegram Bot Failure',
+          title: `${projectName} - Telegram Bot Failure`,
           level: 'critical',
           details: {
-            'Project': 'The Chocolate Mine',
-            'Service': 'Telegram Alert Bot',
+            'Project': projectName,
+            'Service': serviceType,
             'Error Reason': errorMsg,
           },
           footer: 'Action Required: Check bot token with @BotFather.',
@@ -406,9 +290,9 @@ export async function checkChocolateMineTelegram() {
       }
 
       return {
-        id: 'chocolate-mine-telegram',
-        projectName: 'The Chocolate Mine',
-        serviceType: 'Telegram Notification Bot',
+        id,
+        projectName,
+        serviceType,
         status: 'error',
         statusCode: response.status,
         latencyMs,
@@ -420,25 +304,25 @@ export async function checkChocolateMineTelegram() {
     const bot = data.result;
 
     // Recovery Alert if was down
-    if (statusHistory.chocolateMineTelegram === 'error') {
+    if (statusHistory[statusKey] === 'error') {
       await sendTelegramAlert({
-        title: 'Chocolate Mine - Telegram Bot Restored',
+        title: `${projectName} - Telegram Bot Restored`,
         level: 'info',
         details: {
-          'Project': 'The Chocolate Mine',
+          'Project': projectName,
           'Bot Name': bot.first_name,
           'Username': `@${bot.username}`,
           'Status': 'Bot Alive & Online ✅',
         },
-        footer: 'Kitchen and order dispatch alerts are functional.',
+        footer: 'Client notification alerts are functional.',
       });
     }
-    statusHistory.chocolateMineTelegram = 'healthy';
+    statusHistory[statusKey] = 'healthy';
 
     return {
-      id: 'chocolate-mine-telegram',
-      projectName: 'The Chocolate Mine',
-      serviceType: 'Telegram Notification Bot',
+      id,
+      projectName,
+      serviceType,
       status: 'healthy',
       statusCode: 200,
       latencyMs,
@@ -455,14 +339,14 @@ export async function checkChocolateMineTelegram() {
     const latencyMs = Date.now() - startTime;
     const errorMsg = error.name === 'AbortError' ? 'Telegram API Timed Out' : error.message;
 
-    if (statusHistory.chocolateMineTelegram !== 'error') {
-      statusHistory.chocolateMineTelegram = 'error';
+    if (statusHistory[statusKey] !== 'error') {
+      statusHistory[statusKey] = 'error';
 
       await sendTelegramAlert({
-        title: 'Chocolate Mine - Telegram Bot Unreachable',
+        title: `${projectName} - Telegram Bot Unreachable`,
         level: 'critical',
         details: {
-          'Project': 'The Chocolate Mine',
+          'Project': projectName,
           'Service': 'Telegram Bot API',
           'Error Reason': errorMsg,
         },
@@ -471,9 +355,9 @@ export async function checkChocolateMineTelegram() {
     }
 
     return {
-      id: 'chocolate-mine-telegram',
-      projectName: 'The Chocolate Mine',
-      serviceType: 'Telegram Notification Bot',
+      id,
+      projectName,
+      serviceType,
       status: 'error',
       statusCode: 0,
       latencyMs,
@@ -484,21 +368,86 @@ export async function checkChocolateMineTelegram() {
 }
 
 /**
- * 4. Run All Client Service Checks
+ * 1. Check Sakthi Frozen Foods Brevo Email API & Quota
+ */
+export async function checkSakthiBrevoEmail() {
+  return checkBrevoAccount({
+    id: 'sakthi-brevo',
+    projectName: 'Sakthi Frozen Foods',
+    serviceType: 'Email (Brevo API)',
+    apiKey: process.env.SAKTHI_BREVO_API_KEY,
+    envKeyName: 'SAKTHI_BREVO_API_KEY',
+    statusKey: 'sakthiBrevo',
+  });
+}
+
+/**
+ * 2. Check Sakthi Frozen Foods Telegram Order Bot
+ */
+export async function checkSakthiTelegram() {
+  return checkTelegramBot({
+    id: 'sakthi-telegram',
+    projectName: 'Sakthi Frozen Foods',
+    serviceType: 'Telegram Notification Bot',
+    token: process.env.SAKTHI_TELEGRAM_BOT_TOKEN,
+    chatId: process.env.SAKTHI_TELEGRAM_CHAT_ID,
+    envTokenName: 'SAKTHI_TELEGRAM_BOT_TOKEN',
+    statusKey: 'sakthiTelegram',
+  });
+}
+
+/**
+ * 3. Check The Chocolate Mine Brevo Email API & Quota
+ */
+export async function checkChocolateMineBrevoEmail() {
+  return checkBrevoAccount({
+    id: 'chocolate-mine-brevo',
+    projectName: 'The Chocolate Mine',
+    serviceType: 'Email (Brevo API)',
+    apiKey: process.env.CHOCOLATE_MINE_BREVO_API_KEY || process.env.BREVO_API_KEY,
+    envKeyName: 'CHOCOLATE_MINE_BREVO_API_KEY',
+    statusKey: 'chocolateMineBrevo',
+  });
+}
+
+/**
+ * Backward compatibility alias for Chocolate Mine email check
+ */
+export const checkChocolateMineSmtp = checkChocolateMineBrevoEmail;
+
+/**
+ * 4. Check The Chocolate Mine Telegram Alert Bot
+ */
+export async function checkChocolateMineTelegram() {
+  return checkTelegramBot({
+    id: 'chocolate-mine-telegram',
+    projectName: 'The Chocolate Mine',
+    serviceType: 'Telegram Notification Bot',
+    token: process.env.CHOCOLATE_MINE_TELEGRAM_BOT_TOKEN,
+    chatId: process.env.CHOCOLATE_MINE_TELEGRAM_CHAT_ID,
+    envTokenName: 'CHOCOLATE_MINE_TELEGRAM_BOT_TOKEN',
+    statusKey: 'chocolateMineTelegram',
+  });
+}
+
+/**
+ * 5. Run All Client Service Checks
  * @param {boolean} [forceTelegramSummary=false]
  */
 export async function checkAllClientServices(forceTelegramSummary = false) {
-  console.log('🔍 [CLIENT SERVICES MONITOR] Checking Sakthi Brevo, Chocolate Mine SMTP & Telegram...');
+  console.log('🔍 [CLIENT SERVICES MONITOR] Checking Sakthi Brevo & Telegram, Chocolate Mine Brevo & Telegram...');
 
-  const [sakthiRes, chocSmtpRes, chocTgRes] = await Promise.allSettled([
+  const [sakthiBrevoRes, sakthiTgRes, chocBrevoRes, chocTgRes] = await Promise.allSettled([
     checkSakthiBrevoEmail(),
-    checkChocolateMineSmtp(),
+    checkSakthiTelegram(),
+    checkChocolateMineBrevoEmail(),
     checkChocolateMineTelegram(),
   ]);
 
   const services = [
-    sakthiRes.status === 'fulfilled' ? sakthiRes.value : { id: 'sakthi-brevo', status: 'error', error: sakthiRes.reason },
-    chocSmtpRes.status === 'fulfilled' ? chocSmtpRes.value : { id: 'chocolate-mine-smtp', status: 'error', error: chocSmtpRes.reason },
+    sakthiBrevoRes.status === 'fulfilled' ? sakthiBrevoRes.value : { id: 'sakthi-brevo', status: 'error', error: sakthiBrevoRes.reason },
+    sakthiTgRes.status === 'fulfilled' ? sakthiTgRes.value : { id: 'sakthi-telegram', status: 'error', error: sakthiTgRes.reason },
+    chocBrevoRes.status === 'fulfilled' ? chocBrevoRes.value : { id: 'chocolate-mine-brevo', status: 'error', error: chocBrevoRes.reason },
     chocTgRes.status === 'fulfilled' ? chocTgRes.value : { id: 'chocolate-mine-telegram', status: 'error', error: chocTgRes.reason },
   ];
 
@@ -507,16 +456,18 @@ export async function checkAllClientServices(forceTelegramSummary = false) {
 
   // If user requested manual test from admin dashboard, send summary to Telegram
   if (forceTelegramSummary) {
-    const sakthiStatus = services[0].status === 'healthy' ? `✅ Healthy (${services[0].details?.credits ?? 0} Brevo credits)` : `❌ ${services[0].status}`;
-    const chocSmtpStatus = services[1].status === 'healthy' ? '✅ Ready (smtp.gmail.com:587)' : `❌ ${services[1].details?.error || services[1].status}`;
-    const chocTgStatus = services[2].status === 'healthy' ? `✅ Active (${services[2].details?.botUsername})` : `❌ ${services[2].details?.error || services[2].status}`;
+    const sakthiBrevoStatus = services[0].status === 'healthy' ? `✅ Healthy (${services[0].details?.credits ?? 0} Brevo credits)` : `❌ ${services[0].status}`;
+    const sakthiTgStatus = services[1].status === 'healthy' ? `✅ Active (${services[1].details?.botUsername})` : `❌ ${services[1].details?.error || services[1].status}`;
+    const chocBrevoStatus = services[2].status === 'healthy' ? `✅ Healthy (${services[2].details?.credits ?? 0} Brevo credits)` : `❌ ${services[2].status}`;
+    const chocTgStatus = services[3].status === 'healthy' ? `✅ Active (${services[3].details?.botUsername})` : `❌ ${services[3].details?.error || services[3].status}`;
 
     await sendTelegramAlert({
       title: 'Manual Client Services Audit',
       level: services.some(s => s.status !== 'healthy') ? 'warn' : 'success',
       details: {
-        'Sakthi Frozen Foods Email': sakthiStatus,
-        'Chocolate Mine Email': chocSmtpStatus,
+        'Sakthi Frozen Foods Email': sakthiBrevoStatus,
+        'Sakthi Frozen Foods Telegram': sakthiTgStatus,
+        'Chocolate Mine Email': chocBrevoStatus,
         'Chocolate Mine Telegram': chocTgStatus,
         'Audited By': 'AK Webflair Admin Control Center',
       },
@@ -544,4 +495,3 @@ export async function getClientServicesStatus() {
     services: cachedClientServices,
   };
 }
-

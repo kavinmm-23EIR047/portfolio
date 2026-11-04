@@ -831,7 +831,7 @@ const AdminDashboard = () => {
     } catch (err) {}
 
     try {
-      // Fetch Client Project Services (Sakthi Email, Chocolate Mine SMTP & Telegram)
+      // Fetch Client Project Services (Sakthi Email & Telegram, Chocolate Mine Brevo & Telegram)
       const resClient = await fetch(`${backendUrl}/api/monitor/client-services`);
       if (resClient.ok) {
         const dataClient = await resClient.json();
@@ -904,7 +904,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Test & Audit Client Project Services (Sakthi Brevo & Chocolate Mine SMTP/Telegram)
+  // Test & Audit Client Project Services (Sakthi Brevo & Telegram, Chocolate Mine Brevo & Telegram)
   const handleCheckClientServices = async () => {
     setIsCheckingClientServices(true);
     setTelegramStatusMsg(null);
@@ -1992,7 +1992,7 @@ const AdminDashboard = () => {
                 <div>
                   <h4 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2">
                     <Mail size={18} className="text-[#0A4FE0]" />
-                    Client Project Services (Email & Telegram Quota) ({clientServices.length || 3})
+                    Client Project Services (Email & Telegram Quota) ({clientServices.length || 4})
                   </h4>
                   <p className="text-xs text-[#64748B]">
                     Monitored directly via API from AK Webflair Admin — checks delivery health, daily limits & bot status
@@ -2008,7 +2008,7 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
                 {/* 1. SAKTHI BREVO EMAIL */}
                 {(() => {
                   const s = clientServices.find((cs) => cs.id === "sakthi-brevo") || {};
@@ -2095,9 +2095,9 @@ const AdminDashboard = () => {
                             </span>
                           </div>
                           <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0]">
-                            <span className="text-[10px] font-bold text-[#64748B] block">Sender Email</span>
-                            <span className="font-mono text-[11px] font-bold text-[#0F172A] truncate block">
-                              sakthifrozen...
+                            <span className="text-[10px] font-bold text-[#64748B] block">Account</span>
+                            <span className="font-mono text-[11px] font-bold text-[#0F172A] truncate block" title={s.details?.accountEmail}>
+                              {s.details?.accountEmail || "sakthifrozen..."}
                             </span>
                           </div>
                         </div>
@@ -2117,9 +2117,9 @@ const AdminDashboard = () => {
                   );
                 })()}
 
-                {/* 2. CHOCOLATE MINE SMTP */}
+                {/* 2. SAKTHI TELEGRAM BOT */}
                 {(() => {
-                  const s = clientServices.find((cs) => cs.id === "chocolate-mine-smtp") || {};
+                  const s = clientServices.find((cs) => cs.id === "sakthi-telegram") || {};
                   const isHealthy = s.status === "healthy";
 
                   return (
@@ -2128,10 +2128,10 @@ const AdminDashboard = () => {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <span className="text-[10px] font-bold uppercase text-[#64748B] tracking-wider">
-                              The Chocolate Mine
+                              Sakthi Frozen Foods
                             </span>
                             <h5 className="text-base font-extrabold text-[#0F172A] leading-snug">
-                              Gmail SMTP (Nodemailer)
+                              Telegram Orders Bot
                             </h5>
                           </div>
                           <span
@@ -2144,33 +2144,35 @@ const AdminDashboard = () => {
                             <span
                               className={`w-2 h-2 rounded-full ${isHealthy ? "bg-emerald-500" : "bg-rose-500 animate-ping"}`}
                             />
-                            {isHealthy ? "HEALTHY (READY)" : "SMTP ERROR"}
+                            {isHealthy ? "ONLINE (ACTIVE)" : "BOT OFFLINE"}
                           </span>
                         </div>
 
                         {/* Status Strip */}
                         <div className="p-3 rounded-2xl bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] space-y-1">
                           <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wide block">
-                            SMTP Server Handshake
+                            Bot Identity
                           </span>
                           <p className="text-xs font-bold text-[#0F172A]">
-                            {isHealthy ? "Authenticated & Ready for Invoices" : "Authentication or Port Error"}
+                            {s.details?.botUsername || "@sakthi_foods_frozen_bot"}
                           </p>
-                          <p className="text-[10px] font-mono text-[#64748B]">Host: smtp.gmail.com:587</p>
+                          <p className="text-[10px] text-[#64748B] font-mono">
+                            Admin Chat: {s.details?.connectedGroup || "1998216185"}
+                          </p>
                         </div>
 
                         {/* Details */}
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0]">
-                            <span className="text-[10px] font-bold text-[#64748B] block">Handshake Time</span>
+                            <span className="text-[10px] font-bold text-[#64748B] block">Response Latency</span>
                             <span className="font-mono font-bold text-[#0F172A]">
                               {s.latencyMs ? `${s.latencyMs} ms` : "--"}
                             </span>
                           </div>
                           <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0]">
-                            <span className="text-[10px] font-bold text-[#64748B] block">Auth Status</span>
-                            <span className="font-mono text-[11px] font-bold text-emerald-600 truncate block">
-                              Verified OK
+                            <span className="text-[10px] font-bold text-[#64748B] block">Bot Scope</span>
+                            <span className="font-mono text-[11px] font-bold text-[#0F172A] truncate block">
+                              Order Notifications
                             </span>
                           </div>
                         </div>
@@ -2190,7 +2192,115 @@ const AdminDashboard = () => {
                   );
                 })()}
 
-                {/* 3. CHOCOLATE MINE TELEGRAM BOT */}
+                {/* 3. CHOCOLATE MINE BREVO EMAIL */}
+                {(() => {
+                  const s = clientServices.find((cs) => cs.id === "chocolate-mine-brevo" || cs.id === "chocolate-mine-smtp") || {};
+                  const isHealthy = s.status === "healthy";
+                  const isQuotaWarning = s.status === "quota_warning";
+                  const isQuotaExceeded = s.status === "quota_exceeded";
+
+                  return (
+                    <div className="bg-white rounded-3xl p-6 border border-[#CBD5E1] shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="text-[10px] font-bold uppercase text-[#64748B] tracking-wider">
+                              The Chocolate Mine
+                            </span>
+                            <h5 className="text-base font-extrabold text-[#0F172A] leading-snug">
+                              Brevo Transactional Email
+                            </h5>
+                          </div>
+                          <span
+                            className={`px-3 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 ${
+                              isHealthy
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : isQuotaWarning
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-rose-50 text-rose-700 border border-rose-200"
+                            }`}
+                          >
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                isHealthy
+                                  ? "bg-emerald-500"
+                                  : isQuotaWarning
+                                  ? "bg-amber-500"
+                                  : "bg-rose-500 animate-ping"
+                              }`}
+                            />
+                            {isHealthy
+                              ? "HEALTHY (ACTIVE)"
+                              : isQuotaWarning
+                              ? "QUOTA WARNING"
+                              : isQuotaExceeded
+                              ? "LIMIT EXCEEDED"
+                              : "API ERROR"}
+                          </span>
+                        </div>
+
+                        {/* Quota Strip */}
+                        <div className="p-3 rounded-2xl bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] border border-[#E2E8F0] space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-[11px] font-bold text-[#64748B]">Remaining Daily Credits</span>
+                            <span className="font-mono font-black text-sm text-[#0F172A]">
+                              {s.details?.credits !== undefined ? `${s.details.credits} / 300` : "--"}
+                            </span>
+                          </div>
+                          <div className="w-full bg-[#E2E8F0] h-2 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-500 ${
+                                (s.details?.credits ?? 300) > 50
+                                  ? "bg-emerald-500"
+                                  : (s.details?.credits ?? 0) > 15
+                                  ? "bg-amber-500"
+                                  : "bg-rose-500"
+                              }`}
+                              style={{
+                                width: `${Math.min(100, Math.max(0, ((s.details?.credits ?? 300) / 300) * 100))}%`,
+                              }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-[#64748B] font-medium pt-0.5">
+                            Plan: <b className="text-[#0F172A] capitalize">{s.details?.plan || "Free"}</b> • Relay:{" "}
+                            <b className={s.details?.relayActive ? "text-emerald-600" : "text-rose-600"}>
+                              {s.details?.relayActive ? "Enabled" : "Disabled"}
+                            </b>
+                          </p>
+                        </div>
+
+                        {/* Details */}
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0]">
+                            <span className="text-[10px] font-bold text-[#64748B] block">API Latency</span>
+                            <span className="font-mono font-bold text-[#0F172A]">
+                              {s.latencyMs ? `${s.latencyMs} ms` : "--"}
+                            </span>
+                          </div>
+                          <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0]">
+                            <span className="text-[10px] font-bold text-[#64748B] block">Account</span>
+                            <span className="font-mono text-[11px] font-bold text-[#0F172A] truncate block" title={s.details?.accountEmail}>
+                              {s.details?.accountEmail || "chocolatemine..."}
+                            </span>
+                          </div>
+                        </div>
+
+                        {s.details?.error && (
+                          <div className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-[11px] font-medium">
+                            <span className="font-bold">Error:</span> {s.details.error}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-2 border-t border-[#F1F5F9] text-[10px] text-[#94A3B8] font-mono flex justify-between">
+                        <span>Telegram Alerts: ON</span>
+                        <span>{s.lastChecked ? new Date(s.lastChecked).toLocaleTimeString() : "Pending"}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 4. CHOCOLATE MINE TELEGRAM BOT */}
                 {(() => {
                   const s = clientServices.find((cs) => cs.id === "chocolate-mine-telegram") || {};
                   const isHealthy = s.status === "healthy";
