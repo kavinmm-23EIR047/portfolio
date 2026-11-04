@@ -2,6 +2,7 @@ import express from 'express';
 import MonitoredService from '../models/MonitoredService.js';
 import { pingService, checkAllServices } from '../utils/healthMonitor.js';
 import { testTelegramConnection, sendTelegramAlert } from '../utils/telegramAlert.js';
+import { getClientServicesStatus, checkAllClientServices } from '../utils/clientServicesMonitor.js';
 
 const router = express.Router();
 
@@ -100,6 +101,30 @@ router.post('/test-telegram', async (req, res) => {
     } else {
       res.status(400).json({ success: false, message: '❌ Could not deliver message to Telegram. Check bot token and chat ID.' });
     }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET client project services status (Sakthi Brevo, Chocolate Mine SMTP & Telegram)
+router.get('/client-services', async (req, res) => {
+  try {
+    const result = await getClientServicesStatus();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST manual check of all client project services with instant Telegram notification
+router.post('/check-client-services', async (req, res) => {
+  try {
+    const result = await checkAllClientServices(true);
+    res.json({
+      success: true,
+      message: 'Client services checked and Telegram summary dispatched!',
+      ...result,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

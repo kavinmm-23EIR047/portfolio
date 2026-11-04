@@ -1,6 +1,7 @@
 import MonitoredService from '../models/MonitoredService.js';
 import SystemLog from '../models/SystemLog.js';
 import { sendTelegramAlert } from './telegramAlert.js';
+import { checkAllClientServices } from './clientServicesMonitor.js';
 
 // Default initial services to monitor (3 Render deployed backends)
 const DEFAULT_SERVICES = [
@@ -249,6 +250,13 @@ export async function checkAllServices() {
         continue;
       }
       await pingService(service);
+    }
+
+    // Also run proactive checks for client Email & Telegram services
+    try {
+      await checkAllClientServices(false);
+    } catch (clientErr) {
+      console.error('⚠️ Error checking client services:', clientErr.message);
     }
   } catch (error) {
     console.error('❌ Error during health check cycle:', error.message);
