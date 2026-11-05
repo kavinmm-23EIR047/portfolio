@@ -34,6 +34,11 @@ import {
   PhoneCall,
   Volume2,
   X,
+  FileText,
+  HelpCircle,
+  Info,
+  ArrowUpRight,
+  Check,
 } from "lucide-react";
 import { FaWhatsapp as FaWhatsappIcon, FaTelegramPlane } from "react-icons/fa";
 
@@ -123,6 +128,129 @@ const VOICE_LANGUAGES = {
     maybe: ["शायद", "बाद में", "सोचना है", "पता नहीं"],
   },
 };
+
+const HTTP_ERROR_CATALOG_LIST = [
+  {
+    code: 400,
+    name: "Bad Request",
+    issue: "Malformed Request or Missing Parameters",
+    whatHappened: "The client sent invalid, malformed data, or omitted required payload fields.",
+    resolution: "Inspect frontend request payload. Ensure all required JSON fields and data types match backend schema.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 401,
+    name: "Unauthorized",
+    issue: "Authentication Failed / Session Expired",
+    whatHappened: "User attempted to access a protected route without a valid authorization token or session.",
+    resolution: "Check JWT authorization header (Bearer token), verify token expiration, or prompt user to re-login.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 402,
+    name: "Payment Required",
+    issue: "Payment Incomplete or Awaiting Capture",
+    whatHappened: "The requested transaction or feature requires successful payment capture or active subscription.",
+    resolution: "Verify Razorpay payment capture status in dashboard or prompt user to retry payment.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 403,
+    name: "Forbidden",
+    issue: "Access Denied / Insufficient Role Permissions",
+    whatHappened: "User is authenticated, but their account role lacks permission to access this resource.",
+    resolution: "Verify user account role in database (e.g. admin role check) and review authorization middleware rules.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 404,
+    name: "Not Found",
+    issue: "API Endpoint or Resource Not Found",
+    whatHappened: "The requested API route URL, database document ID, or asset does not exist on the server.",
+    resolution: "Check endpoint URL spelling, verify route registration in backend server, or confirm database ID exists.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 405,
+    name: "Method Not Allowed",
+    issue: "HTTP Method Not Supported",
+    whatHappened: "Request used an HTTP method (e.g. GET/POST) not allowed on this specific endpoint route.",
+    resolution: "Align frontend fetch/axios HTTP method (GET, POST, PUT, DELETE) with backend route definition.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 408,
+    name: "Request Timeout",
+    issue: "Client Request Timed Out",
+    whatHappened: "The server timed out waiting for the client request stream to complete transmission.",
+    resolution: "Check client network latency, reduce request payload/image file size, or retry with backoff.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 409,
+    name: "Conflict",
+    issue: "State Conflict / Duplicate Entry",
+    whatHappened: "Request conflicts with current database state (e.g. duplicate email registration or order state lock).",
+    resolution: "Catch duplicate key error in frontend and notify user (e.g. 'Email already registered - please login').",
+    category: "4xx Client Error",
+  },
+  {
+    code: 413,
+    name: "Payload Too Large",
+    issue: "Upload File Size Exceeded",
+    whatHappened: "The uploaded file, image, or request body exceeds server upload limits.",
+    resolution: "Increase express.json({ limit: '10mb' }) in server.js or compress files on frontend before upload.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 422,
+    name: "Unprocessable Entity",
+    issue: "Schema Validation Failed",
+    whatHappened: "Request syntax is valid, but payload data failed schema validation rules (e.g. invalid phone/email format).",
+    resolution: "Check validation schema (Joi/Zod/Mongoose) and display specific validation field errors to the user.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 429,
+    name: "Too Many Requests",
+    issue: "Rate Limit Exceeded",
+    whatHappened: "Client or IP sent too many requests within the rate limiter window.",
+    resolution: "Increase rate limits in express-rate-limit middleware or implement client request debounce and backoff.",
+    category: "4xx Client Error",
+  },
+  {
+    code: 500,
+    name: "Internal Server Error",
+    issue: "Backend Runtime Crash / Unhandled Exception",
+    whatHappened: "Backend server encountered an unhandled exception or crash during business logic or DB query execution.",
+    resolution: "Inspect Render deployment logs for exact stack trace; verify null/undefined checks and database connection.",
+    category: "5xx Server Error",
+  },
+  {
+    code: 502,
+    name: "Bad Gateway",
+    issue: "Reverse Proxy Communication Failure / Boot Crash",
+    whatHappened: "Render reverse proxy could not communicate with backend process (app crashed on startup, wrong port, or OOM).",
+    resolution: "Check Render deploy logs for startup crashes; ensure app binds to process.env.PORT on host 0.0.0.0.",
+    category: "5xx Server Error",
+  },
+  {
+    code: 503,
+    name: "Service Unavailable",
+    issue: "Server Sleeping, Overloaded, or Rebooting",
+    whatHappened: "Server instance is temporarily unable to handle requests (e.g. Render free tier sleeping or deploying).",
+    resolution: "Allow 30-50s for Render free tier cold-boot to finish, or keep instance awake with automated health pings.",
+    category: "5xx Server Error",
+  },
+  {
+    code: 504,
+    name: "Gateway Timeout",
+    issue: "Upstream Execution Timeout",
+    whatHappened: "Backend did not respond within Render gateway timeout period (exceeded 30-100s limit).",
+    resolution: "Add indexes to MongoDB queries, optimize slow third-party API calls, or offload heavy processing to background tasks.",
+    category: "5xx Server Error",
+  },
+];
 
 const VoiceLeadAssistant = ({ lead, backendUrl, onSaved }) => {
   const [languageCode, setLanguageCode] = useState("en");
@@ -489,7 +617,12 @@ const AdminDashboard = () => {
   const [logs, setLogs] = useState([]);
   const [logProjectFilter, setLogProjectFilter] = useState("ALL");
   const [logLevelFilter, setLogLevelFilter] = useState("ALL");
+  const [logStatusFilter, setLogStatusFilter] = useState("ALL");
   const [logSearchQuery, setLogSearchQuery] = useState("");
+  const [isLiveLogStreaming, setIsLiveLogStreaming] = useState(true);
+  const [simulatingStatus, setSimulatingStatus] = useState(null);
+  const [showCatalogModal, setShowCatalogModal] = useState(false);
+  const [catalogSearch, setCatalogSearch] = useState("");
   const [isPingingId, setIsPingingId] = useState(null);
   const [isPingingAll, setIsPingingAll] = useState(false);
   const [isTestingTelegram, setIsTestingTelegram] = useState(false);
@@ -973,6 +1106,82 @@ const AdminDashboard = () => {
     }
   };
 
+  // Refresh logs on demand
+  const handleRefreshLogs = async () => {
+    try {
+      const resLogs = await fetch(`${backendUrl}/api/logs`);
+      if (resLogs.ok) {
+        const dataLogs = await resLogs.json();
+        setLogs(Array.isArray(dataLogs.logs) ? dataLogs.logs : []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Live Streaming Logs Polling (every 5s when active or tab is logs)
+  useEffect(() => {
+    let interval = null;
+    if (isAuthenticated && (isLiveLogStreaming || activeTab === "logs")) {
+      interval = setInterval(async () => {
+        try {
+          const resLogs = await fetch(`${backendUrl}/api/logs`);
+          if (resLogs.ok) {
+            const dataLogs = await resLogs.json();
+            setLogs(Array.isArray(dataLogs.logs) ? dataLogs.logs : []);
+          }
+        } catch (err) {}
+      }, 5000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isAuthenticated, isLiveLogStreaming, activeTab, backendUrl]);
+
+  // Simulate Error to test Telegram alerts & live logging
+  const handleSimulateLog = async (statusCode) => {
+    setSimulatingStatus(statusCode);
+    try {
+      const activeProj = logProjectFilter !== 'ALL' ? logProjectFilter : 'Chocolate Mine Client Project';
+      const sampleMessages = {
+        400: "Missing required shipping address in checkout request payload",
+        401: "User attempted to access protected orders endpoint without valid token (401 Unauthorized)",
+        403: "Customer account attempted to access restricted admin dashboard operations (403 Forbidden)",
+        404: "Requested product ID 'prod_99999' not found in MongoDB catalog",
+        422: "Phone number validation failed: expected 10 digits with country code",
+        429: "Client IP exceeded rate threshold with 120 checkout requests in 60s (429 Too Many Requests)",
+        500: "Unhandled TypeError: Cannot read properties of undefined in order checkout controller (500 Server Error)",
+        502: "Render reverse proxy upstream connection failed - backend process restarting (502 Bad Gateway)",
+        503: "Backend instance sleeping on Render free tier - cold start wake up needed (503 Service Unavailable)",
+        504: "Upstream MongoDB cluster connection timed out after 30000ms (504 Gateway Timeout)",
+      };
+
+      const res = await fetch(`${backendUrl}/api/logs/ingest`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectName: activeProj,
+          environment: "production",
+          statusCode: Number(statusCode),
+          message: sampleMessages[statusCode] || `Simulated HTTP ${statusCode} event for ${activeProj}`,
+          type: "STATUS_ERROR",
+          details: {
+            endpoint: statusCode === 401 ? "/api/v1/auth/verify" : statusCode === 429 ? "/api/v1/payment/checkout" : statusCode === 403 ? "/api/v1/admin/users" : "/api/v1/orders",
+            method: "POST",
+          },
+        }),
+      });
+
+      if (res.ok) {
+        await handleRefreshLogs();
+      }
+    } catch (err) {
+      console.error("Simulation error:", err);
+    } finally {
+      setSimulatingStatus(null);
+    }
+  };
+
 
   // Update Lead Status
   const handleUpdateLeadStatus = async (leadId, newStatus) => {
@@ -1212,6 +1421,7 @@ const AdminDashboard = () => {
             { id: "projects", label: `Projects (${projects.length})`, icon: Layers },
             { id: "partners", label: `Partners (${partners.length})`, icon: Building2 },
             { id: "health", label: `Server Health & Telegram (${services.length})`, icon: Activity },
+            { id: "logs", label: `Real-time Logs (${logs.length})`, icon: Terminal },
             { id: "billdesk", label: "Billdesk SaaS", icon: Building2 },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -2518,6 +2728,490 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+
+        {/* REAL-TIME LOGS & RENDER DIAGNOSTICS TAB */}
+        {activeTab === "logs" && (
+          <div className="space-y-6">
+            {/* REAL-TIME LOGS & RENDER DIAGNOSTICS BANNER */}
+            <div className="bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0A4FE0] text-white p-6 rounded-3xl shadow-lg border border-white/10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-inner">
+                  <Terminal size={28} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-black tracking-tight">Real-Time Project Logs & Render Diagnostic Stream</h3>
+                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      {isLiveLogStreaming ? "LIVE AUTO-STREAM (5s)" : "STREAM PAUSED"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-blue-100 mt-1 font-medium">
+                    Aggregated live telemetry from all client backends. Captures HTTP errors, 401s, 429s, 500 crashes, and triggers plain-English Telegram alerts.
+                  </p>
+                  <p className="text-[11px] font-mono text-blue-200/80 mt-1">
+                    Central Ingestion Endpoint: <code className="bg-black/30 px-2 py-0.5 rounded text-emerald-300">/api/logs/ingest</code> • Active Logs Recorded: <span className="text-white font-bold">{logs.length}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5 relative z-10">
+                <button
+                  onClick={() => setIsLiveLogStreaming(!isLiveLogStreaming)}
+                  className={`flex items-center gap-1.5 font-extrabold px-3.5 py-2 rounded-xl text-xs transition-all cursor-pointer ${
+                    isLiveLogStreaming
+                      ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                      : "bg-white/15 hover:bg-white/25 text-white border border-white/20"
+                  }`}
+                >
+                  <Radio size={13} className={isLiveLogStreaming ? "animate-pulse" : ""} />
+                  <span>{isLiveLogStreaming ? "Streaming Active" : "Resume Stream"}</span>
+                </button>
+
+                <button
+                  onClick={handleRefreshLogs}
+                  className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs transition-all border border-white/20 cursor-pointer"
+                >
+                  <RefreshCw size={13} />
+                  <span>Refresh Now</span>
+                </button>
+
+                <button
+                  onClick={() => setShowCatalogModal(true)}
+                  className="flex items-center gap-1.5 bg-white text-[#0A4FE0] hover:bg-blue-50 font-extrabold px-3.5 py-2 rounded-xl text-xs transition-all shadow-md cursor-pointer"
+                >
+                  <HelpCircle size={14} />
+                  <span>HTTP Error Guide (401, 500...)</span>
+                </button>
+
+                <button
+                  onClick={handleClearLogs}
+                  className="flex items-center gap-1.5 bg-rose-500/80 hover:bg-rose-600 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs transition-all cursor-pointer border border-rose-400/30"
+                >
+                  <Trash2 size={13} />
+                  <span>Clear</span>
+                </button>
+              </div>
+            </div>
+
+            {/* PROJECT SELECTOR & DIRECT RENDER LOG ACCESS CARDS */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-extrabold text-[#0F172A] flex items-center gap-2">
+                    <Layers size={16} className="text-[#0A4FE0]" />
+                    Select Project to View Logs & Render Console
+                  </h4>
+                  <p className="text-xs text-[#64748B]">
+                    Click any project below to filter its logs or launch Render's live deployment console
+                  </p>
+                </div>
+                {logProjectFilter !== "ALL" && (
+                  <button
+                    onClick={() => setLogProjectFilter("ALL")}
+                    className="text-xs font-bold text-[#0A4FE0] hover:underline cursor-pointer"
+                  >
+                    ← Reset to All Projects ({logs.length})
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                {/* ALL PROJECTS CARD */}
+                <div
+                  onClick={() => setLogProjectFilter("ALL")}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                    logProjectFilter === "ALL"
+                      ? "bg-blue-50/70 border-[#0A4FE0] shadow-sm ring-2 ring-[#0A4FE0]/20"
+                      : "bg-white border-[#CBD5E1] hover:border-[#0A4FE0]/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-extrabold text-[#0F172A]">All Projects</span>
+                    <span className="text-[10px] font-mono font-bold bg-[#F1F5F9] text-[#475569] px-2 py-0.5 rounded-full">
+                      {logs.length} logs
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#64748B] mt-1 font-medium">
+                    Aggregated stream across all client environments
+                  </p>
+                  <div className="mt-3 pt-2.5 border-t border-[#E2E8F0] flex items-center justify-between text-[11px] text-[#0A4FE0] font-bold">
+                    <span>{logProjectFilter === "ALL" ? "✓ Currently Selected" : "Click to View All"}</span>
+                  </div>
+                </div>
+
+                {/* INDIVIDUAL MONITORED PROJECTS */}
+                {services.map((srv) => {
+                  const isSelected = logProjectFilter === srv.name;
+                  const isOnline = srv.lastStatus === "online";
+                  const isColdBoot = srv.lastStatus === "cold_boot";
+                  const projectLogsCount = logs.filter((l) => l.projectName === srv.name).length;
+
+                  return (
+                    <div
+                      key={srv._id || srv.name}
+                      onClick={() => setLogProjectFilter(srv.name)}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? "bg-blue-50/70 border-[#0A4FE0] shadow-sm ring-2 ring-[#0A4FE0]/20"
+                          : "bg-white border-[#CBD5E1] hover:border-[#0A4FE0]/50"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-extrabold text-[#0F172A] truncate" title={srv.name}>
+                            {srv.name}
+                          </span>
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 ${
+                              isOnline
+                                ? "bg-emerald-500 animate-pulse"
+                                : isColdBoot
+                                ? "bg-amber-500"
+                                : "bg-rose-500"
+                            }`}
+                          />
+                        </div>
+
+                        <p className="text-[10px] font-mono text-[#64748B] truncate mt-1" title={srv.url}>
+                          {srv.url.replace("https://", "")}
+                        </p>
+
+                        <div className="flex items-center gap-2 mt-2">
+                          <span
+                            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                              isOnline
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : isColdBoot
+                                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                : "bg-rose-50 text-rose-700 border border-rose-200"
+                            }`}
+                          >
+                            {srv.lastStatus || "unknown"} {srv.lastStatusCode ? `(${srv.lastStatusCode})` : ""}
+                          </span>
+                          <span className="text-[10px] font-mono text-[#64748B]">
+                            {srv.lastLatencyMs ? `${srv.lastLatencyMs}ms` : ""}
+                          </span>
+                          <span className="text-[10px] font-mono text-[#0A4FE0] font-bold ml-auto">
+                            {projectLogsCount} logs
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 pt-2.5 border-t border-[#E2E8F0] flex items-center justify-between gap-1">
+                        <a
+                          href="https://dashboard.render.com"
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1 text-[10px] font-black text-[#0A4FE0] hover:text-[#0639A8] bg-blue-50 px-2 py-1 rounded-md border border-blue-200"
+                          title="Open Render Live Logs in Dashboard"
+                        >
+                          <ExternalLink size={10} />
+                          <span>Render Logs</span>
+                        </a>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePingService(srv._id);
+                          }}
+                          disabled={isPingingId === srv._id}
+                          className="flex items-center gap-1 text-[10px] font-bold text-[#475569] hover:text-[#0F172A] bg-[#F1F5F9] px-2 py-1 rounded-md cursor-pointer disabled:opacity-50"
+                        >
+                          <RefreshCw size={10} className={isPingingId === srv._id ? "animate-spin" : ""} />
+                          <span>Ping</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* INSTANT ERROR SIMULATOR FOR TESTING TELEGRAM BOT & LOG STREAM */}
+            <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-amber-900">
+                  <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+                  <span className="text-xs font-black">
+                    Test Telegram Alert Bot & Status Error Formatter:
+                  </span>
+                  <span className="text-[11px] text-amber-800">
+                    Click any test below to verify that Telegram receives the short, simple explanation & resolution!
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-200">
+                  Target: {logProjectFilter === "ALL" ? "Chocolate Mine Client Project" : logProjectFilter}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {[
+                  { code: 401, label: "Simulate 401 Unauthorized", desc: "Auth token missing/expired" },
+                  { code: 403, label: "Simulate 403 Forbidden", desc: "User lacks permission" },
+                  { code: 429, label: "Simulate 429 Too Many Requests", desc: "Rate limit triggered" },
+                  { code: 500, label: "Simulate 500 Server Error", desc: "Unhandled backend crash" },
+                  { code: 502, label: "Simulate 502 Bad Gateway", desc: "Render boot/proxy failure" },
+                  { code: 503, label: "Simulate 503 Unavailable", desc: "Render free tier cold wake" },
+                ].map((item) => (
+                  <button
+                    key={item.code}
+                    onClick={() => handleSimulateLog(item.code)}
+                    disabled={simulatingStatus === item.code}
+                    className="flex items-center gap-1.5 bg-white hover:bg-amber-100 text-amber-950 font-extrabold px-3 py-1.5 rounded-xl text-[11px] transition-all border border-amber-300 cursor-pointer disabled:opacity-50 shadow-xs"
+                    title={item.desc}
+                  >
+                    <Send size={11} className={simulatingStatus === item.code ? "animate-spin" : ""} />
+                    <span>{simulatingStatus === item.code ? `Testing ${item.code}...` : item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* LOG STREAM CONTROLS & TABLE */}
+            <div className="bg-white rounded-3xl p-6 border border-[#CBD5E1] shadow-xs space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2">
+                    <Terminal size={18} className="text-[#0A4FE0]" />
+                    Central System Logs ({logs.length})
+                    {logProjectFilter !== "ALL" && (
+                      <span className="text-xs font-bold text-[#0A4FE0] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                        {logProjectFilter}
+                      </span>
+                    )}
+                  </h4>
+                  <p className="text-xs text-[#64748B]">
+                    Showing real-time events with auto-diagnostic resolution badges
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[#64748B]">
+                    Filtered:{" "}
+                    <span className="text-[#0F172A] font-extrabold">
+                      {
+                        logs.filter((l) => {
+                          const matchesProj = logProjectFilter === "ALL" || l.projectName === logProjectFilter;
+                          const matchesLvl = logLevelFilter === "ALL" || l.level === logLevelFilter;
+                          const matchesStatus =
+                            logStatusFilter === "ALL" ||
+                            (logStatusFilter === "4xx" && l.statusCode >= 400 && l.statusCode < 500) ||
+                            (logStatusFilter === "5xx" && l.statusCode >= 500 && l.statusCode < 600) ||
+                            String(l.statusCode) === logStatusFilter;
+                          const matchesQ =
+                            !logSearchQuery ||
+                            l.message?.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
+                            l.type?.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
+                            l.details?.issue?.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
+                            l.details?.resolution?.toLowerCase().includes(logSearchQuery.toLowerCase());
+                          return matchesProj && matchesLvl && matchesStatus && matchesQ;
+                        }).length
+                      }
+                    </span>{" "}
+                    of {logs.length}
+                  </span>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div className="relative sm:col-span-2">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={14} />
+                  <input
+                    type="text"
+                    placeholder="Search logs message, issue, or resolution..."
+                    value={logSearchQuery}
+                    onChange={(e) => setLogSearchQuery(e.target.value)}
+                    className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-[#0F172A] outline-none"
+                  />
+                </div>
+
+                <select
+                  value={logStatusFilter}
+                  onChange={(e) => setLogStatusFilter(e.target.value)}
+                  className="bg-[#F8FAFC] border border-[#CBD5E1] text-xs font-bold text-[#0F172A] px-3 py-2 rounded-xl outline-none"
+                >
+                  <option value="ALL">All HTTP Codes</option>
+                  <option value="4xx">⚠️ All 4xx Client Errors</option>
+                  <option value="5xx">🚨 All 5xx Server Errors</option>
+                  <option value="400">400 Bad Request</option>
+                  <option value="401">401 Unauthorized</option>
+                  <option value="403">403 Forbidden</option>
+                  <option value="404">404 Not Found</option>
+                  <option value="422">422 Unprocessable Entity</option>
+                  <option value="429">429 Too Many Requests</option>
+                  <option value="500">500 Internal Server Error</option>
+                  <option value="502">502 Bad Gateway</option>
+                  <option value="503">503 Service Unavailable</option>
+                  <option value="504">504 Gateway Timeout</option>
+                </select>
+
+                <select
+                  value={logLevelFilter}
+                  onChange={(e) => setLogLevelFilter(e.target.value)}
+                  className="bg-[#F8FAFC] border border-[#CBD5E1] text-xs font-bold text-[#0F172A] px-3 py-2 rounded-xl outline-none"
+                >
+                  <option value="ALL">All Severities</option>
+                  <option value="critical">🚨 Critical (5xx)</option>
+                  <option value="warn">⚠️ Warnings (4xx)</option>
+                  <option value="error">🔴 Errors</option>
+                  <option value="info">ℹ️ Info Only</option>
+                </select>
+              </div>
+
+              {/* Logs Stream Cards */}
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                {logs
+                  .filter((l) => {
+                    const matchesProj = logProjectFilter === "ALL" || l.projectName === logProjectFilter;
+                    const matchesLvl = logLevelFilter === "ALL" || l.level === logLevelFilter;
+                    const matchesStatus =
+                      logStatusFilter === "ALL" ||
+                      (logStatusFilter === "4xx" && l.statusCode >= 400 && l.statusCode < 500) ||
+                      (logStatusFilter === "5xx" && l.statusCode >= 500 && l.statusCode < 600) ||
+                      String(l.statusCode) === logStatusFilter;
+                    const matchesQ =
+                      !logSearchQuery ||
+                      l.message?.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
+                      l.type?.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
+                      l.details?.issue?.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
+                      l.details?.resolution?.toLowerCase().includes(logSearchQuery.toLowerCase());
+                    return matchesProj && matchesLvl && matchesStatus && matchesQ;
+                  })
+                  .map((logItem, idx) => {
+                    const isCritical = logItem.level === "critical" || (logItem.statusCode >= 500);
+                    const isWarn = logItem.level === "warn" || (logItem.statusCode >= 400 && logItem.statusCode < 500);
+                    const isError = logItem.level === "error";
+
+                    const issue = logItem.details?.issue;
+                    const whatHappened = logItem.details?.whatHappened;
+                    const resolution = logItem.details?.resolution;
+                    const endpoint = logItem.details?.endpoint;
+                    const method = logItem.details?.method;
+
+                    return (
+                      <div
+                        key={logItem._id || idx}
+                        className={`p-4 rounded-2xl border text-xs transition-all flex flex-col gap-3 ${
+                          isCritical
+                            ? "bg-rose-50/50 border-rose-200"
+                            : isWarn
+                            ? "bg-amber-50/50 border-amber-200"
+                            : isError
+                            ? "bg-red-50/50 border-red-200"
+                            : "bg-[#F8FAFC] border-[#E2E8F0]"
+                        }`}
+                      >
+                        {/* Header Row */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {logItem.statusCode ? (
+                              <span
+                                className={`px-2.5 py-0.5 rounded-md text-[11px] font-black font-mono shrink-0 ${
+                                  logItem.statusCode >= 500
+                                    ? "bg-rose-600 text-white"
+                                    : logItem.statusCode >= 400
+                                    ? "bg-amber-600 text-white"
+                                    : "bg-emerald-600 text-white"
+                                }`}
+                              >
+                                HTTP {logItem.statusCode}
+                              </span>
+                            ) : (
+                              <span
+                                className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase shrink-0 ${
+                                  isCritical
+                                    ? "bg-rose-600 text-white"
+                                    : isWarn
+                                    ? "bg-amber-500 text-white"
+                                    : isError
+                                    ? "bg-red-600 text-white"
+                                    : "bg-blue-600 text-white"
+                                }`}
+                              >
+                                {logItem.level}
+                              </span>
+                            )}
+
+                            <span className="font-extrabold text-[#0F172A]">{logItem.projectName}</span>
+
+                            <span className="text-[10px] font-mono text-[#64748B] bg-white px-2 py-0.5 rounded border border-[#CBD5E1]">
+                              {logItem.type}
+                            </span>
+
+                            {endpoint && (
+                              <span className="text-[10px] font-mono text-[#475569] bg-white px-2 py-0.5 rounded border border-[#CBD5E1]">
+                                {method ? `${method} ` : ""}{endpoint}
+                              </span>
+                            )}
+
+                            {logItem.telegramSent && (
+                              <span className="flex items-center gap-1 text-[10px] font-bold text-[#0A4FE0] bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                <FaTelegramPlane size={10} /> Dispatched to Telegram
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="text-[11px] font-mono text-[#64748B] shrink-0">
+                            {new Date(logItem.createdAt).toLocaleString("en-IN", {
+                              dateStyle: "medium",
+                              timeStyle: "medium",
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Raw Message */}
+                        <div className="font-medium text-[#1E293B] leading-relaxed">
+                          {logItem.message}
+                        </div>
+
+                        {/* Smart Diagnostic & Actionable Resolution Section */}
+                        {(issue || whatHappened || resolution) && (
+                          <div className="bg-white/90 p-3 rounded-xl border border-[#CBD5E1] space-y-2">
+                            {issue && (
+                              <div className="flex items-start gap-1.5 text-[#0F172A]">
+                                <span className="font-extrabold shrink-0 text-indigo-700">🔍 Issue:</span>
+                                <span className="font-semibold">{issue}</span>
+                              </div>
+                            )}
+
+                            {whatHappened && (
+                              <div className="flex items-start gap-1.5 text-[#334155]">
+                                <span className="font-extrabold shrink-0 text-slate-700">📝 What Happened:</span>
+                                <span>{whatHappened}</span>
+                              </div>
+                            )}
+
+                            {resolution && (
+                              <div className="bg-blue-50/80 border border-blue-200 rounded-lg p-2.5 flex items-start gap-2">
+                                <span className="text-base shrink-0 leading-none">💡</span>
+                                <div>
+                                  <span className="font-black text-[#0A4FE0] block text-[11px] uppercase tracking-wide">
+                                    How to Resolve:
+                                  </span>
+                                  <span className="text-[#0F172A] font-bold leading-normal">
+                                    {resolution}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                {logs.length === 0 && (
+                  <div className="p-8 text-center text-slate-400 font-bold bg-[#F8FAFC] rounded-2xl border border-dashed border-[#CBD5E1]">
+                    No system logs recorded yet. Everything is functioning normally!
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
 
@@ -2692,6 +3386,107 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* HTTP ERROR CODES CATALOG MODAL */}
+      {showCatalogModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0A4FE0] flex items-center justify-center font-bold">
+                  <HelpCircle size={22} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-[#0F172A]">HTTP Error Codes & Actionable Resolution Guide</h3>
+                  <p className="text-xs text-[#64748B]">
+                    Full reference of status errors, explanations, and instant resolutions handled by Telegram & Admin
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCatalogModal(false)}
+                className="w-8 h-8 rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] flex items-center justify-center text-[#64748B] cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={14} />
+              <input
+                type="text"
+                placeholder="Search error code (e.g. 401, 403, 500) or issue keyword..."
+                value={catalogSearch}
+                onChange={(e) => setCatalogSearch(e.target.value)}
+                className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-[#0F172A] outline-none"
+              />
+            </div>
+
+            <div className="overflow-y-auto space-y-3 flex-1 pr-1">
+              {HTTP_ERROR_CATALOG_LIST
+                .filter((item) => {
+                  if (!catalogSearch) return true;
+                  const q = catalogSearch.toLowerCase();
+                  return (
+                    String(item.code).includes(q) ||
+                    item.name.toLowerCase().includes(q) ||
+                    item.issue.toLowerCase().includes(q) ||
+                    item.whatHappened.toLowerCase().includes(q) ||
+                    item.resolution.toLowerCase().includes(q)
+                  );
+                })
+                .map((item) => (
+                  <div
+                    key={item.code}
+                    className={`p-4 rounded-2xl border text-xs space-y-2 ${
+                      item.code >= 500
+                        ? "bg-rose-50/40 border-rose-200"
+                        : "bg-amber-50/40 border-amber-200"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-md font-mono font-black text-white ${
+                            item.code >= 500 ? "bg-rose-600" : "bg-amber-600"
+                          }`}
+                        >
+                          HTTP {item.code}
+                        </span>
+                        <span className="font-extrabold text-[#0F172A] text-sm">{item.name}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#64748B] uppercase">{item.category}</span>
+                    </div>
+
+                    <div className="text-[#0F172A] font-bold">
+                      🔍 Issue: <span className="text-slate-800 font-semibold">{item.issue}</span>
+                    </div>
+
+                    <div className="text-[#475569]">
+                      📝 What Happened: <span>{item.whatHappened}</span>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 text-[#0F172A]">
+                      <span className="font-extrabold text-[#0A4FE0] block text-[10px] uppercase">
+                        💡 How to Resolve:
+                      </span>
+                      <span className="font-bold text-xs">{item.resolution}</span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            <div className="pt-2 border-t flex justify-end">
+              <button
+                onClick={() => setShowCatalogModal(false)}
+                className="px-5 py-2 rounded-xl bg-[#0A4FE0] text-white font-extrabold text-xs cursor-pointer"
+              >
+                Close Guide
+              </button>
+            </div>
           </div>
         </div>
       )}

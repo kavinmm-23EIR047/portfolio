@@ -30,10 +30,36 @@ export async function sendTelegramAlert({ title, level = 'info', details = {}, f
   const header = `${icon} <b>${title.toUpperCase()}</b>`;
   
   let body = '';
+  let whatHappenedText = '';
+  let resolutionText = '';
+  let issueText = '';
+
   for (const [key, val] of Object.entries(details)) {
     if (val !== undefined && val !== null && val !== '') {
-      body += `\n• <b>${key}:</b> <code>${String(val).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`;
+      const sanitizedVal = String(val).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      if (key.toLowerCase() === 'what happened' || key.toLowerCase() === 'whathappened') {
+        whatHappenedText = sanitizedVal;
+      } else if (key.toLowerCase() === 'how to resolve' || key.toLowerCase() === 'resolution') {
+        resolutionText = sanitizedVal;
+      } else if (key.toLowerCase() === 'issue') {
+        issueText = sanitizedVal;
+      } else {
+        body += `\n• <b>${key}:</b> <code>${sanitizedVal}</code>`;
+      }
     }
+  }
+
+  // Prepend Issue if present
+  if (issueText) {
+    body = `\n🔍 <b>ISSUE:</b> <code>${issueText}</code>` + body;
+  }
+
+  // Append What Happened and How to Resolve prominently
+  if (whatHappenedText) {
+    body += `\n\n📝 <b>WHAT HAPPENED:</b>\n<i>${whatHappenedText}</i>`;
+  }
+  if (resolutionText) {
+    body += `\n\n💡 <b>HOW TO RESOLVE:</b>\n👉 <code>${resolutionText}</code>`;
   }
 
   const timestamp = new Date().toLocaleString('en-IN', {

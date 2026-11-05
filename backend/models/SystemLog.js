@@ -18,17 +18,6 @@ const systemLogSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: [
-      'HEALTH_CHECK',
-      'SERVER_DOWN',
-      'COLD_START',
-      'SLOW_RESPONSE',
-      'EMAIL_SUCCESS',
-      'EMAIL_FAILURE',
-      'EMAIL_QUOTA_EXCEEDED',
-      'UNCAUGHT_EXCEPTION',
-      'GENERAL_LOG',
-    ],
     default: 'GENERAL_LOG',
     index: true,
   },

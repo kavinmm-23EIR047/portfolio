@@ -2,6 +2,7 @@ import MonitoredService from '../models/MonitoredService.js';
 import SystemLog from '../models/SystemLog.js';
 import { sendTelegramAlert } from './telegramAlert.js';
 import { checkAllClientServices } from './clientServicesMonitor.js';
+import { getHttpErrorInfo } from './httpErrorGuide.js';
 
 // Default initial services to monitor (3 Render deployed backends)
 const DEFAULT_SERVICES = [
@@ -157,6 +158,8 @@ export async function pingService(service) {
       service.consecutiveFailures = (service.consecutiveFailures || 0) + 1;
       service.lastError = errorMessage;
 
+      const errorGuide = getHttpErrorInfo(response.status, errorMessage);
+
       await SystemLog.create({
         projectName: service.name,
         level: 'critical',
@@ -164,17 +167,26 @@ export async function pingService(service) {
         message: `Server returned error status: ${errorMessage}`,
         statusCode,
         latencyMs,
-        details: { url: targetUrl, error: errorMessage },
+        details: {
+          url: targetUrl,
+          error: errorMessage,
+          issue: errorGuide.issue,
+          whatHappened: errorGuide.whatHappened,
+          resolution: errorGuide.resolution,
+        },
         telegramSent: true,
       });
 
       telegramSent = await sendTelegramAlert({
-        title: 'Critical: Server Error Status',
+        title: `${service.name} - ${errorGuide.status} ${errorGuide.name}`,
         level: 'critical',
         details: {
           'Project': service.name,
           'URL': targetUrl,
-          'Status Code': `${statusCode} (${response.statusText})`,
+          'Status Code': `${statusCode} (${response.statusText || errorGuide.name})`,
+          'Issue': errorGuide.issue,
+          'What Happened': errorGuide.whatHappened,
+          'How to Resolve': errorGuide.resolution,
           'Consecutive Failures': service.consecutiveFailures,
         },
         footer: 'Check deployment logs on Render/Server immediately!',
@@ -187,6 +199,8 @@ export async function pingService(service) {
     service.consecutiveFailures = (service.consecutiveFailures || 0) + 1;
     service.lastError = errorMessage;
 
+    const errorGuide = getHttpErrorInfo(0, errorMessage);
+
     // Only alert if it's the first failure or every 3rd failure to prevent spam
     if (service.consecutiveFailures === 1 || service.consecutiveFailures % 3 === 0) {
       await SystemLog.create({
@@ -196,20 +210,29 @@ export async function pingService(service) {
         message: `Service unreachable or crashed: ${errorMessage}`,
         statusCode: 0,
         latencyMs,
-        details: { url: targetUrl, error: errorMessage },
+        details: {
+          url: targetUrl,
+          error: errorMessage,
+          issue: errorGuide.issue,
+          whatHappened: errorGuide.whatHappened,
+          resolution: errorGuide.resolution,
+        },
         telegramSent: true,
       });
 
       telegramSent = await sendTelegramAlert({
-        title: 'Critical: Server Down / Unreachable',
+        title: `${service.name} - Service Down / Unreachable`,
         level: 'critical',
         details: {
           'Project': service.name,
           'URL': targetUrl,
-          'Error Reason': errorMessage,
+          'Status Code': '0 (Timeout / Unreachable)',
+          'Issue': errorGuide.issue,
+          'What Happened': errorGuide.whatHappened,
+          'How to Resolve': errorGuide.resolution,
           'Consecutive Failures': service.consecutiveFailures,
         },
-        footer: 'Server did not respond. Check hosting provider.',
+        footer: 'Server did not respond within 35s. Check hosting provider.',
       });
     }
   }
